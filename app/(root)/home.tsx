@@ -12,37 +12,37 @@ export default function Home() {
     {
       id: 1,
       title: "Street Flooding",
-      location: "Quezon City",
+      location: "Lianga, Surigao del Sur",
       time: "2 hours ago",
       status: "Under Review",
       statusColor: "bg-yellow-100",
       statusTextColor: "text-yellow-800",
       image: "https://images.unsplash.com/photo-1547683905-f686c993aae5?w=400",
-      description: "Water level reaching knee height at Commonwealth Ave.",
+      description: "Water level reaching knee height at Lianga Baywalk area.",
       messages: 2,
     },
     {
       id: 2,
       title: "House Fire",
-      location: "Makati City",
+      location: "Lianga, Surigao del Sur",
       time: "5 hours ago",
       status: "Resolved",
       statusColor: "bg-green-100",
       statusTextColor: "text-green-800",
       image: "https://images.unsplash.com/photo-1528114039593-4366cc08227d?w=400",
-      description: "Fire at residential area, smoke visible from street.",
+      description: "Fire at residential area near Lianga Municipal Hall, smoke visible from street.",
       messages: 8,
     },
     {
       id: 3,
       title: "Road Blockage",
-      location: "Baguio City",
+      location: "Lianga, Surigao del Sur",
       time: "1 day ago",
       status: "In Progress",
       statusColor: "bg-blue-100",
       statusTextColor: "text-blue-800",
       image: "https://images.unsplash.com/photo-1592500595497-534a3f6bffd2?w=400",
-      description: "Fallen tree blocking the main road after heavy rain.",
+      description: "Fallen coconut tree blocking the highway near Lianga Public Market after heavy rain.",
       messages: 5,
     },
   ];
@@ -50,7 +50,7 @@ export default function Home() {
   return (
     <View className="flex-1 bg-gray-50">
       {/* Header */}
-      <View className="bg-white px-4 py-4 flex-row items-center justify-between border-b border-gray-200" style={{ marginTop: insets.bottom }}>
+      <View className="bg-white px-4 py-4 flex-row items-center justify-between border-b border-gray-200" style={{ marginTop: insets.top }}>
         <View className="flex-row items-center gap-2">
           <View className="w-10 h-10 bg-[#DC2626] rounded-lg items-center justify-center">
             <Text className="text-white text-xl font-bold">D</Text>
@@ -84,7 +84,7 @@ export default function Home() {
             <View className="flex-1">
               <Text className="font-semibold text-yellow-800">Tropical Storm Warning</Text>
               <Text className="text-sm text-yellow-700 mt-1">
-                Heavy rainfall expected in Metro Manila. Stay updated and prepare emergency supplies.
+                Heavy rainfall expected in Surigao del Sur province including Lianga. Stay updated and prepare emergency supplies.
               </Text>
             </View>
           </View>
@@ -286,7 +286,7 @@ export default function Home() {
                 <View className="items-end max-w-[80%]">
                   <View className="bg-[#DC2626] rounded-lg p-3 shadow-sm">
                     <Text className="text-sm text-white">
-                      The water level is rising quickly. Several cars are stuck.
+                      The water level is rising quickly near Lianga Baywalk. Several motorcycles are stuck.
                     </Text>
                   </View>
                   <Text className="text-xs text-gray-500 mt-1">1 hour ago</Text>
