@@ -1,71 +1,70 @@
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { useState } from "react";
-import { Image, Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Image, Modal, ScrollView, StatusBar, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
-export default function Home() {
+export default function Index() {
   const insets = useSafeAreaInsets()
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [chatModalVisible, setChatModalVisible] = useState(false);
+  const [emergencyCallVisible, setEmergencyCallVisible] = useState(false);
+  const [callConnecting, setCallConnecting] = useState(false);
 
   const reports = [
     {
       id: 1,
       title: "Street Flooding",
-      location: "Lianga, Surigao del Sur",
+      location: "Quezon City",
       time: "2 hours ago",
       status: "Under Review",
       statusColor: "bg-yellow-100",
       statusTextColor: "text-yellow-800",
       image: "https://images.unsplash.com/photo-1547683905-f686c993aae5?w=400",
-      description: "Water level reaching knee height at Lianga Baywalk area.",
+      description: "Water level reaching knee height at Commonwealth Ave.",
       messages: 2,
     },
     {
       id: 2,
       title: "House Fire",
-      location: "Lianga, Surigao del Sur",
+      location: "Makati City",
       time: "5 hours ago",
       status: "Resolved",
       statusColor: "bg-green-100",
       statusTextColor: "text-green-800",
       image: "https://images.unsplash.com/photo-1528114039593-4366cc08227d?w=400",
-      description: "Fire at residential area near Lianga Municipal Hall, smoke visible from street.",
+      description: "Fire at residential area, smoke visible from street.",
       messages: 8,
     },
     {
       id: 3,
       title: "Road Blockage",
-      location: "Lianga, Surigao del Sur",
+      location: "Baguio City",
       time: "1 day ago",
       status: "In Progress",
       statusColor: "bg-blue-100",
       statusTextColor: "text-blue-800",
       image: "https://images.unsplash.com/photo-1592500595497-534a3f6bffd2?w=400",
-      description: "Fallen coconut tree blocking the highway near Lianga Public Market after heavy rain.",
+      description: "Fallen tree blocking the main road after heavy rain.",
       messages: 5,
     },
   ];
 
   return (
     <View className="flex-1 bg-gray-50">
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+
       {/* Header */}
-      <View className="bg-white px-4 py-4 flex-row items-center justify-between border-b border-gray-200" style={{ marginTop: insets.top }}>
+      <View className="bg-white px-4 py-3 flex-row items-center justify-between border-b border-gray-100" style={{ marginTop: insets.top }}>
         <View className="flex-row items-center gap-2">
-          <View className="w-10 h-10 bg-[#DC2626] rounded-lg items-center justify-center">
+          <View className="w-10 h-10 bg-[#E63946] rounded-lg items-center justify-center">
             <Text className="text-white text-xl font-bold">D</Text>
           </View>
           <Text className="text-xl font-bold text-gray-900">DisasterEye</Text>
         </View>
-        <View className="flex-row items-center gap-4">
-          <TouchableOpacity className="p-2 relative">
-            <Ionicons name="chatbubble-outline" size={24} color="#4B5563" />
-            <View className="absolute top-1 right-1 w-2 h-2 bg-[#DC2626] rounded-full" />
-          </TouchableOpacity>
-          <View className="w-10 h-10 bg-blue-600 rounded-full items-center justify-center">
-            <Text className="text-white font-semibold">JD</Text>
-          </View>
-        </View>
+        <TouchableOpacity className="w-10 h-10 bg-gray-100 rounded-full items-center justify-center">
+          <Ionicons name="notifications-outline" size={24} color="#4B5563" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView className="flex-1">
@@ -84,20 +83,31 @@ export default function Home() {
             <View className="flex-1">
               <Text className="font-semibold text-yellow-800">Tropical Storm Warning</Text>
               <Text className="text-sm text-yellow-700 mt-1">
-                Heavy rainfall expected in Surigao del Sur province including Lianga. Stay updated and prepare emergency supplies.
+                Heavy rainfall expected in Metro Manila. Stay updated and prepare emergency supplies.
               </Text>
             </View>
           </View>
         </View>
 
         {/* Quick Report Button */}
-        <View className="mx-4 mb-6">
+        <View className="mx-4 mb-4">
           <TouchableOpacity
             onPress={() => setReportModalVisible(true)}
-            className="bg-[#DC2626] active:bg-[#B91C1C] py-4 rounded-lg flex-row items-center justify-center gap-2 shadow-lg"
+            className="bg-[#E63946] active:bg-[#D32F2F] py-4 rounded-lg flex-row items-center justify-center gap-2 shadow-lg"
           >
             <Ionicons name="camera" size={24} color="white" />
             <Text className="text-white font-semibold text-base">Report Incident Now</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Emergency Call Button */}
+        <View className="mx-4 mb-6">
+          <TouchableOpacity
+            onPress={() => router.push('/(root)/alert')}
+            className="bg-white border-2 border-[#E63946] py-4 rounded-lg flex-row items-center justify-center gap-2 shadow-sm active:bg-red-50"
+          >
+            <Ionicons name="alert-circle" size={24} color="#E63946" />
+            <Text className="text-[#E63946] font-semibold text-base">Send Emergency Alert</Text>
           </TouchableOpacity>
         </View>
 
@@ -138,8 +148,8 @@ export default function Home() {
                     onPress={() => setChatModalVisible(true)}
                     className="flex-row items-center gap-1"
                   >
-                    <Ionicons name="chatbubble-outline" size={16} color="#DC2626" />
-                    <Text className="text-sm text-[#DC2626] font-medium">
+                    <Ionicons name="chatbubble-outline" size={16} color="#E63946" />
+                    <Text className="text-sm text-[#E63946] font-medium">
                       View Messages ({report.messages})
                     </Text>
                   </TouchableOpacity>
@@ -157,7 +167,7 @@ export default function Home() {
           <View className="p-4 gap-3">
             <TouchableOpacity className="flex-row items-center justify-between p-3 bg-red-50 rounded-lg active:bg-red-100">
               <View className="flex-row items-center gap-3">
-                <View className="w-10 h-10 bg-[#DC2626] rounded-full items-center justify-center">
+                <View className="w-10 h-10 bg-[#E63946] rounded-full items-center justify-center">
                   <Ionicons name="call" size={20} color="white" />
                 </View>
                 <View>
@@ -203,7 +213,7 @@ export default function Home() {
                 {/* Photo Upload */}
                 <View>
                   <Text className="text-sm font-medium text-gray-700 mb-2">Upload Photo</Text>
-                  <TouchableOpacity className="border-2 border-dashed border-gray-300 rounded-lg p-8 items-center active:border-[#DC2626]">
+                  <TouchableOpacity className="border-2 border-dashed border-gray-300 rounded-lg p-8 items-center active:border-[#E63946]">
                     <Ionicons name="camera" size={48} color="#9CA3AF" />
                     <Text className="text-sm text-gray-600 mt-2">
                       Click to take photo or upload image
@@ -236,12 +246,209 @@ export default function Home() {
                 </View>
 
                 {/* Submit Button */}
-                <TouchableOpacity className="bg-[#DC2626] active:bg-[#B91C1C] py-3 rounded-lg items-center">
+                <TouchableOpacity className="bg-[#E63946] active:bg-[#D32F2F] py-3 rounded-lg items-center">
                   <Text className="text-white font-semibold">Send Report to MDRRMC</Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>
           </View>
+        </View>
+      </Modal>
+
+      {/* Emergency Call Modal */}
+      <Modal
+        visible={emergencyCallVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setEmergencyCallVisible(false)}
+      >
+        <View className="flex-1 bg-black/80">
+          <SafeAreaView className="flex-1">
+            <View className="flex-1 items-center justify-center px-6">
+              {!callConnecting ? (
+                <>
+                  {/* Emergency Alert Form */}
+                  <View className="bg-white rounded-3xl p-6 w-full max-w-md">
+                    <View className="items-center mb-4">
+                      <View className="w-16 h-16 bg-[#E63946] rounded-full items-center justify-center mb-3">
+                        <Ionicons name="alert-circle" size={32} color="white" />
+                      </View>
+                      <Text className="text-2xl font-bold text-gray-900 mb-1">Emergency Alert</Text>
+                      <Text className="text-center text-gray-600 text-sm">
+                        Send your location and details to MDRRMC
+                      </Text>
+                    </View>
+
+                    <ScrollView className="max-h-96">
+                      {/* User Information */}
+                      <View className="mb-4">
+                        <Text className="text-sm font-medium text-gray-700 mb-2">Your Name</Text>
+                        <View className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-200">
+                          <Text className="text-gray-900">Juan Dela Cruz</Text>
+                        </View>
+                      </View>
+
+                      <View className="mb-4">
+                        <Text className="text-sm font-medium text-gray-700 mb-2">Contact Number</Text>
+                        <View className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-200">
+                          <Text className="text-gray-900">+63 912 345 6789</Text>
+                        </View>
+                      </View>
+
+                      {/* Location Info */}
+                      <View className="bg-blue-50 rounded-lg p-4 mb-4 border border-blue-200">
+                        <View className="flex-row items-center gap-2 mb-2">
+                          <Ionicons name="location" size={20} color="#2563EB" />
+                          <Text className="font-semibold text-gray-900">Your Current Location</Text>
+                        </View>
+                        <Text className="text-sm text-gray-700 mb-1">Lianga, Surigao del Sur</Text>
+                        <Text className="text-xs text-gray-600 mb-2">Latitude: 8.6281, Longitude: 126.1019</Text>
+                        <View className="flex-row items-center gap-1 mt-2 pt-2 border-t border-blue-200">
+                          <View className="w-2 h-2 bg-green-500 rounded-full" />
+                          <Text className="text-xs text-green-700 font-medium">GPS Location Acquired</Text>
+                        </View>
+                      </View>
+
+                      {/* Emergency Type */}
+                      <View className="mb-4">
+                        <Text className="text-sm font-medium text-gray-700 mb-2">Emergency Type</Text>
+                        <View className="gap-2">
+                          <TouchableOpacity className="bg-red-50 border-2 border-red-500 px-4 py-3 rounded-lg flex-row items-center gap-2">
+                            <Ionicons name="flame" size={20} color="#DC2626" />
+                            <Text className="text-gray-900 font-medium">Fire</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity className="bg-gray-50 border border-gray-200 px-4 py-3 rounded-lg flex-row items-center gap-2">
+                            <Ionicons name="water" size={20} color="#6B7280" />
+                            <Text className="text-gray-700">Flood</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity className="bg-gray-50 border border-gray-200 px-4 py-3 rounded-lg flex-row items-center gap-2">
+                            <Ionicons name="medkit" size={20} color="#6B7280" />
+                            <Text className="text-gray-700">Medical Emergency</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity className="bg-gray-50 border border-gray-200 px-4 py-3 rounded-lg flex-row items-center gap-2">
+                            <Ionicons name="alert" size={20} color="#6B7280" />
+                            <Text className="text-gray-700">Other Emergency</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+
+                      {/* Additional Details */}
+                      <View className="mb-4">
+                        <Text className="text-sm font-medium text-gray-700 mb-2">Additional Details (Optional)</Text>
+                        <View className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-200 min-h-20">
+                          <Text className="text-gray-500">Describe the situation...</Text>
+                        </View>
+                      </View>
+                    </ScrollView>
+
+                    {/* Send Button */}
+                    <TouchableOpacity
+                      onPress={() => {
+                        setCallConnecting(true);
+                        // Simulate sending emergency alert
+                        setTimeout(() => {
+                          setCallConnecting(false);
+                          setEmergencyCallVisible(false);
+                        }, 3000);
+                      }}
+                      className="bg-[#E63946] active:bg-[#D32F2F] w-full py-4 rounded-full mb-3 shadow-lg"
+                    >
+                      <Text className="text-white font-bold text-base text-center">
+                        Send Emergency Alert
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      onPress={() => setEmergencyCallVisible(false)}
+                      className="py-2"
+                    >
+                      <Text className="text-gray-500 font-medium text-center">Cancel</Text>
+                    </TouchableOpacity>
+                  </View>
+                </>
+              ) : (
+                <>
+                  {/* Sending Alert Screen */}
+                  <View className="items-center">
+                    <View className="w-32 h-32 bg-[#E63946] rounded-full items-center justify-center mb-6 relative">
+                      <Ionicons name="checkmark-circle" size={64} color="white" />
+                      {/* Pulsing rings */}
+                      <View className="absolute w-40 h-40 bg-[#E63946] rounded-full opacity-20 animate-pulse" />
+                      <View className="absolute w-48 h-48 bg-[#E63946] rounded-full opacity-10 animate-pulse" />
+                    </View>
+
+                    <Text className="text-white text-2xl font-bold mb-2">Alert Sent!</Text>
+                    <Text className="text-white/80 text-base mb-8 text-center px-8">
+                      MDRRMC has received your emergency alert and location
+                    </Text>
+
+                    {/* Details Sent */}
+                    <View className="bg-white/10 rounded-2xl p-6 mb-8 w-full max-w-md">
+                      <View className="flex-row items-center gap-3 mb-3 pb-3 border-b border-white/20">
+                        <View className="w-10 h-10 bg-white/20 rounded-full items-center justify-center">
+                          <Ionicons name="person" size={20} color="white" />
+                        </View>
+                        <View className="flex-1">
+                          <Text className="text-white/60 text-xs">Name</Text>
+                          <Text className="text-white font-semibold">Juan Dela Cruz</Text>
+                        </View>
+                      </View>
+
+                      <View className="flex-row items-center gap-3 mb-3 pb-3 border-b border-white/20">
+                        <View className="w-10 h-10 bg-white/20 rounded-full items-center justify-center">
+                          <Ionicons name="call" size={20} color="white" />
+                        </View>
+                        <View className="flex-1">
+                          <Text className="text-white/60 text-xs">Contact</Text>
+                          <Text className="text-white font-semibold">+63 912 345 6789</Text>
+                        </View>
+                      </View>
+
+                      <View className="flex-row items-center gap-3 mb-3 pb-3 border-b border-white/20">
+                        <View className="w-10 h-10 bg-white/20 rounded-full items-center justify-center">
+                          <Ionicons name="location" size={20} color="white" />
+                        </View>
+                        <View className="flex-1">
+                          <Text className="text-white/60 text-xs">Location</Text>
+                          <Text className="text-white font-semibold">8.6281, 126.1019</Text>
+                        </View>
+                      </View>
+
+                      <View className="flex-row items-center gap-3">
+                        <View className="w-10 h-10 bg-white/20 rounded-full items-center justify-center">
+                          <Ionicons name="flame" size={20} color="white" />
+                        </View>
+                        <View className="flex-1">
+                          <Text className="text-white/60 text-xs">Emergency Type</Text>
+                          <Text className="text-white font-semibold">Fire</Text>
+                        </View>
+                      </View>
+                    </View>
+
+                    {/* Action Buttons */}
+                    <View className="gap-3 w-full max-w-md px-6">
+                      <TouchableOpacity
+                        className="bg-white py-4 rounded-full"
+                        onPress={() => setChatModalVisible(true)}
+                      >
+                        <Text className="text-[#E63946] font-bold text-center">Message MDRRMC</Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        onPress={() => {
+                          setCallConnecting(false);
+                          setEmergencyCallVisible(false);
+                        }}
+                        className="py-3"
+                      >
+                        <Text className="text-white font-medium text-center">Close</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </>
+              )}
+            </View>
+          </SafeAreaView>
         </View>
       </Modal>
 
@@ -284,9 +491,9 @@ export default function Home() {
               {/* User Message */}
               <View className="flex-row justify-end mb-4">
                 <View className="items-end max-w-[80%]">
-                  <View className="bg-[#DC2626] rounded-lg p-3 shadow-sm">
+                  <View className="bg-[#E63946] rounded-lg p-3 shadow-sm">
                     <Text className="text-sm text-white">
-                      The water level is rising quickly near Lianga Baywalk. Several motorcycles are stuck.
+                      The water level is rising quickly. Several cars are stuck.
                     </Text>
                   </View>
                   <Text className="text-xs text-gray-500 mt-1">1 hour ago</Text>
@@ -315,7 +522,7 @@ export default function Home() {
                 <View className="flex-1 px-4 py-3 border border-gray-300 rounded-lg">
                   <Text className="text-gray-500">Type a message...</Text>
                 </View>
-                <TouchableOpacity className="px-4 py-3 bg-[#DC2626] active:bg-[#B91C1C] rounded-lg items-center justify-center">
+                <TouchableOpacity className="px-4 py-3 bg-[#E63946] active:bg-[#D32F2F] rounded-lg items-center justify-center">
                   <Ionicons name="send" size={20} color="white" />
                 </TouchableOpacity>
               </View>
@@ -323,6 +530,8 @@ export default function Home() {
           </View>
         </View>
       </Modal>
+
+
     </View>
   );
 }

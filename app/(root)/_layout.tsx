@@ -32,6 +32,14 @@ export default function RootLayout() {
           )
         }}
       />
+
+      <Tabs.Screen
+        name='alert'
+        options={{
+          href: null,
+          tabBarStyle: { display: 'none' }
+        }}
+      />
     </Tabs>
   )
 }
