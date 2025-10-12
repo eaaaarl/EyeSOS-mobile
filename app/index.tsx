@@ -8,4 +8,4 @@ export default function index() {
       <Link className='text-center font-semibold' href={'/(auth)/welcome'}>GO TO WELCOME</Link>
     </SafeAreaView>
   )
-}
+} 
