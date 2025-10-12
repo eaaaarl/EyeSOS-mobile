@@ -115,7 +115,7 @@ export default function Index() {
         <View className="bg-white mx-4 mb-6 rounded-lg shadow-sm">
           <View className="p-4 border-b border-gray-200 flex-row items-center justify-between">
             <Text className="text-lg font-bold text-gray-900">My Reports</Text>
-            <Text className="text-sm text-gray-600">3 active</Text>
+            <Text className="text-sm text-gray-600 font-semibold">3 active</Text>
           </View>
 
           {reports.map((report, index) => (
@@ -213,9 +213,9 @@ export default function Index() {
                 {/* Photo Upload */}
                 <View>
                   <Text className="text-sm font-medium text-gray-700 mb-2">Upload Photo</Text>
-                  <TouchableOpacity className="border-2 border-dashed border-gray-300 rounded-lg p-8 items-center active:border-[#E63946]">
+                  <TouchableOpacity onPress={() => router.push('/(root)/camera')} className="border-2 border-dashed border-gray-300 rounded-lg p-8 items-center active:border-[#E63946]">
                     <Ionicons name="camera" size={48} color="#9CA3AF" />
-                    <Text className="text-sm text-gray-600 mt-2">
+                    <Text className="text-sm text-gray-600 mt-2 font-semibold">
                       Click to take photo or upload image
                     </Text>
                   </TouchableOpacity>
@@ -333,8 +333,6 @@ export default function Index() {
           </View>
         </View>
       </Modal>
-
-
     </View>
   );
 }
