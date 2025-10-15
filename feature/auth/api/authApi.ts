@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
-import { signInPayload, signUpPayload } from "./interface";
+import { getProfilesRespons, signInPayload, signUpPayload } from "./interface";
 
 export const authApi = createApi({
   reducerPath: "authApi",
@@ -82,7 +82,47 @@ export const authApi = createApi({
         };
       },
     }),
+
+    getProfiles: builder.query<getProfilesRespons, { id: string }>({
+      queryFn: async ({ id }) => {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", id)
+          .single();
+
+        if (error) {
+          return {
+            error: {
+              message: error.message,
+            },
+          };
+        }
+
+        return {
+          data: {
+            profile: data,
+          },
+        };
+      },
+    }),
+
+    signOut: builder.mutation<any, void>({
+      queryFn: async () => {
+        await supabase.auth.signOut();
+        return {
+          data: {
+            status: true,
+          },
+        };
+      },
+    }),
   }),
 });
 
-export const { useSignUpMutation, useSignInMutation } = authApi;
+export const {
+  useSignUpMutation,
+  useSignInMutation,
+  useGetProfilesQuery,
+  useSignOutMutation,
+} = authApi;

@@ -8,8 +8,6 @@ export default function Index() {
   const insets = useSafeAreaInsets()
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [chatModalVisible, setChatModalVisible] = useState(false);
-  const [emergencyCallVisible, setEmergencyCallVisible] = useState(false);
-  const [callConnecting, setCallConnecting] = useState(false);
 
   const reports = [
     {
@@ -20,7 +18,7 @@ export default function Index() {
       status: "Under Review",
       statusColor: "bg-yellow-100",
       statusTextColor: "text-yellow-800",
-      image: "https://images.unsplash.com/photo-1547683905-f686c993aae5?w=400",
+      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQUGPe6qvJr0369R1iFkaGhDx6LDEa1bjrAuA&s",
       description: "Water level reaching knee height at Commonwealth Ave.",
       messages: 2,
     },
@@ -32,7 +30,7 @@ export default function Index() {
       status: "Resolved",
       statusColor: "bg-green-100",
       statusTextColor: "text-green-800",
-      image: "https://images.unsplash.com/photo-1528114039593-4366cc08227d?w=400",
+      image: "https://cdn.sanity.io/images/ycvw0l8e/production/b60207faf3c300ab95d4d67eccc3175c1e74da9d-4800x2700.jpg",
       description: "Fire at residential area, smoke visible from street.",
       messages: 8,
     },
@@ -44,7 +42,7 @@ export default function Index() {
       status: "In Progress",
       statusColor: "bg-blue-100",
       statusTextColor: "text-blue-800",
-      image: "https://images.unsplash.com/photo-1592500595497-534a3f6bffd2?w=400",
+      image: "https://media.philstar.com/images/articles/gen11-otis-bridge-eddgumban2018-06-2722-44-58_2018-09-05_12-40-12.jpg",
       description: "Fallen tree blocking the main road after heavy rain.",
       messages: 5,
     },

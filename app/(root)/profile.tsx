@@ -1,10 +1,29 @@
+import { useGetProfilesQuery, useSignOutMutation } from '@/feature/auth/api/authApi';
+import { useAppSelector } from '@/lib/redux/hooks';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Modal,
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function Profile() {
-  const insets = useSafeAreaInsets()
+  const insets = useSafeAreaInsets();
+
+  const currentUser = useAppSelector((state) => state.auth);
+  const [signOut] = useSignOutMutation()
+  const { data: user, isLoading } = useGetProfilesQuery({ id: currentUser.id }, {
+    skip: !currentUser.id
+  });
+  const handleSignOut = async () => {
+    await signOut()
+  }
   return (
     <View className="flex-1 bg-gray-50">
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
@@ -19,11 +38,19 @@ export default function Profile() {
       <ScrollView className="flex-1">
         <View className="bg-white px-4 py-6 items-center border-b border-gray-100 mt-2">
           <View className="w-24 h-24 bg-blue-600 rounded-full items-center justify-center mb-3">
-            <Text className="text-white text-4xl font-bold">EDA</Text>
+            <Text className="text-white text-4xl font-bold">
+              {user?.profile?.name?.charAt(0) || 'U'}
+            </Text>
           </View>
-          <Text className="text-2xl font-bold text-gray-900">Earl Dominic Ado</Text>
-          <Text className="text-gray-600 font-normal mt-1">earlado@email.com</Text>
-          <Text className="text-sm text-gray-500 font-normal mt-1">09816042**</Text>
+          <Text className="text-2xl font-bold text-gray-900">
+            {user?.profile?.name || 'User'}
+          </Text>
+          <Text className="text-gray-600 font-normal mt-1">
+            {user?.profile?.email || ''}
+          </Text>
+          <Text className="text-sm text-gray-500 font-normal mt-1">
+            {user?.profile?.mobileNo || ''}
+          </Text>
 
           <TouchableOpacity className="mt-4 px-6 py-2 bg-[#E63946] rounded-lg active:bg-[#D32F2F]">
             <Text className="text-white font-semibold">Edit Profile</Text>
@@ -52,7 +79,7 @@ export default function Profile() {
 
         <View className="bg-white mx-4 mb-4 rounded-lg overflow-hidden">
           <View className="px-4 py-3 border-b border-gray-100">
-            <Text className="text-sm font-semibold text-gray-500  uppercase">Account</Text>
+            <Text className="text-sm font-semibold text-gray-500 uppercase">Account</Text>
           </View>
 
           <TouchableOpacity className="flex-row items-center justify-between px-4 py-4 border-b border-gray-100 active:bg-gray-50">
@@ -101,7 +128,7 @@ export default function Profile() {
             <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
           </TouchableOpacity>
 
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-4 border-b border-gray-100 active:bg-gray-50">
+          {/* <TouchableOpacity className="flex-row items-center justify-between px-4 py-4 border-b border-gray-100 active:bg-gray-50">
             <View className="flex-row items-center gap-3">
               <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center">
                 <Ionicons name="language-outline" size={20} color="#F97316" />
@@ -124,10 +151,9 @@ export default function Profile() {
             <View className="w-12 h-7 bg-gray-300 rounded-full p-1">
               <View className="w-5 h-5 bg-white rounded-full" />
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
-        {/* Support Section */}
         <View className="bg-white mx-4 mb-4 rounded-lg overflow-hidden">
           <View className="px-4 py-3 border-b border-gray-100">
             <Text className="text-sm font-semibold text-gray-500 uppercase">Support</Text>
@@ -164,18 +190,31 @@ export default function Profile() {
           </TouchableOpacity>
         </View>
 
-        {/* Logout Button */}
         <View className="mx-4 mb-6">
-          <TouchableOpacity className="bg-white border border-[#E63946] py-4 rounded-lg active:bg-red-50">
+          <TouchableOpacity onPress={handleSignOut} className="bg-white border border-[#E63946] py-4 rounded-lg active:bg-red-50">
             <Text className="text-[#E63946] font-semibold text-center text-base">Logout</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Version */}
         <View className="items-center pb-6">
           <Text className="text-sm text-gray-400 font-normal">Version 1.0.0</Text>
         </View>
       </ScrollView>
+
+      <Modal
+        transparent
+        visible={isLoading}
+        animationType="fade"
+      >
+        <View
+          className="flex-1 justify-center items-center"
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.1)' }}
+        >
+          <View className="bg-white p-6 rounded-2xl items-center">
+            <ActivityIndicator size="large" color="#0286FF" />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
