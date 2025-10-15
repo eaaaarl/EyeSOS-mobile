@@ -15,7 +15,7 @@ export default function Index() {
     {
       id: 1,
       title: "Street Flooding",
-      location: "Quezon City",
+      location: "Lianga, Surigao Del Sur",
       time: "2 hours ago",
       status: "Under Review",
       statusColor: "bg-yellow-100",
@@ -27,7 +27,7 @@ export default function Index() {
     {
       id: 2,
       title: "House Fire",
-      location: "Makati City",
+      location: "Lianga, Surigao Del Sur",
       time: "5 hours ago",
       status: "Resolved",
       statusColor: "bg-green-100",
@@ -39,7 +39,7 @@ export default function Index() {
     {
       id: 3,
       title: "Road Blockage",
-      location: "Baguio City",
+      location: "Lianga, Surigao Del Sur",
       time: "1 day ago",
       status: "In Progress",
       statusColor: "bg-blue-100",
@@ -58,9 +58,9 @@ export default function Index() {
       <View className="bg-white px-4 py-3 flex-row items-center justify-between border-b border-gray-100" style={{ marginTop: insets.top }}>
         <View className="flex-row items-center gap-2">
           <View className="w-10 h-10 bg-[#E63946] rounded-lg items-center justify-center">
-            <Text className="text-white text-xl font-bold">D</Text>
+            <Text className="text-white text-xl font-bold">E</Text>
           </View>
-          <Text className="text-xl font-bold text-gray-900">DisasterEye</Text>
+          <Text className="text-xl font-bold text-gray-900">EyeSOS</Text>
         </View>
         <TouchableOpacity className="w-10 h-10 bg-gray-100 rounded-full items-center justify-center">
           <Ionicons name="notifications-outline" size={24} color="#4B5563" />
@@ -77,7 +77,7 @@ export default function Index() {
         </View>
 
         {/* Alert Banner */}
-        <View className="bg-yellow-50 border-l-4 border-yellow-400 mx-4 mb-6 p-4 rounded-r-lg">
+        {/* <View className="bg-yellow-50 border-l-4 border-yellow-400 mx-4 mb-6 p-4 rounded-r-lg">
           <View className="flex-row items-start">
             <Ionicons name="warning" size={24} color="#F59E0B" style={{ marginRight: 12 }} />
             <View className="flex-1">
@@ -87,7 +87,7 @@ export default function Index() {
               </Text>
             </View>
           </View>
-        </View>
+        </View> */}
 
         {/* Quick Report Button */}
         <View className="mx-4 mb-4">

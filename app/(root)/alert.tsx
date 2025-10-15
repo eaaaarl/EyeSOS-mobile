@@ -43,7 +43,7 @@ export default function Alert() {
               </View>
               <View className="flex-1">
                 <Text className="text-white/60 text-xs mb-1">Name</Text>
-                <Text className="text-white font-semibold text-base">Juan Dela Cruz</Text>
+                <Text className="text-white font-semibold text-base">Earl Dominic Ado</Text>
               </View>
             </View>
 
@@ -53,7 +53,7 @@ export default function Alert() {
               </View>
               <View className="flex-1">
                 <Text className="text-white/60 text-xs mb-1">Contact</Text>
-                <Text className="text-white font-semibold text-base">+63 912 345 6789</Text>
+                <Text className="text-white font-semibold text-base">098160423**</Text>
               </View>
             </View>
 
@@ -118,14 +118,14 @@ export default function Alert() {
           <View className="mb-3">
             <Text className="text-sm font-medium text-gray-600 mb-2">Name</Text>
             <View className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-200">
-              <Text className="text-gray-900 font-semibold">Juan Dela Cruz</Text>
+              <Text className="text-gray-900 font-semibold">Earl Dominic Ado</Text>
             </View>
           </View>
 
           <View>
             <Text className="text-sm font-medium text-gray-600 mb-2">Contact Number</Text>
             <View className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-200">
-              <Text className="text-gray-900 font-semibold">+63 912 345 6789</Text>
+              <Text className="text-gray-900 font-semibold">098160423**</Text>
             </View>
           </View>
         </View>

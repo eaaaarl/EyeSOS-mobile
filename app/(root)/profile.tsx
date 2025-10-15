@@ -19,11 +19,11 @@ export default function Profile() {
       <ScrollView className="flex-1">
         <View className="bg-white px-4 py-6 items-center border-b border-gray-100 mt-2">
           <View className="w-24 h-24 bg-blue-600 rounded-full items-center justify-center mb-3">
-            <Text className="text-white text-4xl font-bold">JD</Text>
+            <Text className="text-white text-4xl font-bold">EDA</Text>
           </View>
-          <Text className="text-2xl font-bold text-gray-900">Juan Dela Cruz</Text>
-          <Text className="text-gray-600 font-normal mt-1">juandelacruz@email.com</Text>
-          <Text className="text-sm text-gray-500 font-normal mt-1">+63 912 345 6789</Text>
+          <Text className="text-2xl font-bold text-gray-900">Earl Dominic Ado</Text>
+          <Text className="text-gray-600 font-normal mt-1">earlado@email.com</Text>
+          <Text className="text-sm text-gray-500 font-normal mt-1">09816042**</Text>
 
           <TouchableOpacity className="mt-4 px-6 py-2 bg-[#E63946] rounded-lg active:bg-[#D32F2F]">
             <Text className="text-white font-semibold">Edit Profile</Text>
