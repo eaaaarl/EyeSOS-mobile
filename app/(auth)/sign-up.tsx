@@ -6,14 +6,18 @@ import { icons } from "@/constant/icon";
 import { Link } from "expo-router";
 import { useCallback, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const SignIn = () => {
+const SignUp = () => {
+  const insets = useSafeAreaInsets()
   const [form, setForm] = useState({
     email: "",
     password: "",
+    name: "",
+    phone: ""
   });
 
-  const onSignInPress = useCallback(async () => {
+  const onSignUpPress = useCallback(async () => {
     console.log(form)
   }, [form]);
 
@@ -26,11 +30,27 @@ const SignIn = () => {
       <View className="flex-1 bg-white">
         <View className="relative w-full h-[250px]">
           {/* <Image source={images.baobaoAuth} className="z-0 w-full h-[250px]" /> */}
-          {/*  <Text className="text-2xl text-black font-semibold absolute bottom-5 left-5">
-            Welcome
-          </Text> */}
+          <Text className="text-2xl text-black font-semibold absolute bottom-5 left-5">
+            Create Your Account
+          </Text>
         </View>
         <View className="p-5">
+          <InputField
+            label="Name"
+            placeholder="Enter full name"
+            icon={icons.person}
+            textContentType="emailAddress"
+            value={form.email}
+            onChangeText={(value) => setForm({ ...form, email: value })}
+          />
+          <InputField
+            label="Mobile No."
+            placeholder="Enter mobile no."
+            icon={icons.phone}
+            textContentType="emailAddress"
+            value={form.email}
+            onChangeText={(value) => setForm({ ...form, email: value })}
+          />
           <InputField
             label="Email"
             placeholder="Enter email"
@@ -50,17 +70,17 @@ const SignIn = () => {
           />
           <CustomButton
             title={`Sign Up`}
-            onPress={onSignInPress}
+            onPress={onSignUpPress}
             className="mt-6"
           />
           <OAuth />
-          <View className="flex-row justify-center items-center mt-10">
-            <Text className="text-lg text-general-200">Don&apos;t have an account? </Text>
+          <View className="flex-row justify-center items-center mt-10" style={{ marginBottom: insets.bottom }}>
+            <Text className="text-lg text-general-200">Already have an account? </Text>
             <Link
-              href={`/(auth)/sign-up`}
+              href={`/(auth)/sign-in`}
               className=""
             >
-              <Text className="text-lg text-primary-500 underline font-medium">Sign Up</Text>
+              <Text className="text-lg text-primary-500 underline font-medium">Sign In</Text>
             </Link>
           </View>
         </View>
@@ -69,4 +89,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default SignUp;
