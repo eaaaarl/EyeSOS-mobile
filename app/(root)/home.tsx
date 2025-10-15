@@ -8,43 +8,41 @@ export default function Index() {
   const insets = useSafeAreaInsets()
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [chatModalVisible, setChatModalVisible] = useState(false);
-  const [emergencyCallVisible, setEmergencyCallVisible] = useState(false);
-  const [callConnecting, setCallConnecting] = useState(false);
 
   const reports = [
     {
       id: 1,
       title: "Street Flooding",
-      location: "Quezon City",
+      location: "Lianga, Surigao Del Sur",
       time: "2 hours ago",
       status: "Under Review",
       statusColor: "bg-yellow-100",
       statusTextColor: "text-yellow-800",
-      image: "https://images.unsplash.com/photo-1547683905-f686c993aae5?w=400",
+      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQUGPe6qvJr0369R1iFkaGhDx6LDEa1bjrAuA&s",
       description: "Water level reaching knee height at Commonwealth Ave.",
       messages: 2,
     },
     {
       id: 2,
       title: "House Fire",
-      location: "Makati City",
+      location: "Lianga, Surigao Del Sur",
       time: "5 hours ago",
       status: "Resolved",
       statusColor: "bg-green-100",
       statusTextColor: "text-green-800",
-      image: "https://images.unsplash.com/photo-1528114039593-4366cc08227d?w=400",
+      image: "https://cdn.sanity.io/images/ycvw0l8e/production/b60207faf3c300ab95d4d67eccc3175c1e74da9d-4800x2700.jpg",
       description: "Fire at residential area, smoke visible from street.",
       messages: 8,
     },
     {
       id: 3,
       title: "Road Blockage",
-      location: "Baguio City",
+      location: "Lianga, Surigao Del Sur",
       time: "1 day ago",
       status: "In Progress",
       statusColor: "bg-blue-100",
       statusTextColor: "text-blue-800",
-      image: "https://images.unsplash.com/photo-1592500595497-534a3f6bffd2?w=400",
+      image: "https://media.philstar.com/images/articles/gen11-otis-bridge-eddgumban2018-06-2722-44-58_2018-09-05_12-40-12.jpg",
       description: "Fallen tree blocking the main road after heavy rain.",
       messages: 5,
     },
@@ -58,9 +56,9 @@ export default function Index() {
       <View className="bg-white px-4 py-3 flex-row items-center justify-between border-b border-gray-100" style={{ marginTop: insets.top }}>
         <View className="flex-row items-center gap-2">
           <View className="w-10 h-10 bg-[#E63946] rounded-lg items-center justify-center">
-            <Text className="text-white text-xl font-bold">D</Text>
+            <Text className="text-white text-xl font-bold">E</Text>
           </View>
-          <Text className="text-xl font-bold text-gray-900">DisasterEye</Text>
+          <Text className="text-xl font-bold text-gray-900">EyeSOS</Text>
         </View>
         <TouchableOpacity className="w-10 h-10 bg-gray-100 rounded-full items-center justify-center">
           <Ionicons name="notifications-outline" size={24} color="#4B5563" />
@@ -77,7 +75,7 @@ export default function Index() {
         </View>
 
         {/* Alert Banner */}
-        <View className="bg-yellow-50 border-l-4 border-yellow-400 mx-4 mb-6 p-4 rounded-r-lg">
+        {/* <View className="bg-yellow-50 border-l-4 border-yellow-400 mx-4 mb-6 p-4 rounded-r-lg">
           <View className="flex-row items-start">
             <Ionicons name="warning" size={24} color="#F59E0B" style={{ marginRight: 12 }} />
             <View className="flex-1">
@@ -87,7 +85,7 @@ export default function Index() {
               </Text>
             </View>
           </View>
-        </View>
+        </View> */}
 
         {/* Quick Report Button */}
         <View className="mx-4 mb-4">
