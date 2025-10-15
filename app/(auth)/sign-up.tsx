@@ -108,7 +108,7 @@ const SignUp = () => {
       if ('error' in res) {
         Alert.alert(
           "Sign Up Failed",
-          res.error?.message || "An error occurred during sign up",
+          "An error occurred during sign up",
           [{ text: "OK" }]
         );
       } else if ('data' in res) {

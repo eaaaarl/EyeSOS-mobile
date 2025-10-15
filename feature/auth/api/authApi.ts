@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
-import { signUpPayload } from "./interface";
+import { signInPayload, signUpPayload } from "./interface";
 
 export const authApi = createApi({
   reducerPath: "authApi",
@@ -59,7 +59,30 @@ export const authApi = createApi({
         };
       },
     }),
+
+    signIn: builder.mutation<any, signInPayload>({
+      queryFn: async ({ email, password }) => {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) {
+          return {
+            error: {
+              message: error.message,
+            },
+          };
+        }
+
+        return {
+          data: {
+            user: data.user,
+          },
+        };
+      },
+    }),
   }),
 });
 
-export const { useSignUpMutation } = authApi;
+export const { useSignUpMutation, useSignInMutation } = authApi;
