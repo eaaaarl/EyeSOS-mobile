@@ -8,27 +8,54 @@ export const authApi = createApi({
   endpoints: (builder) => ({
     signUp: builder.mutation<any, signUpPayload>({
       queryFn: async ({ email, mobileNo, name, password }) => {
-        const { data, error } = await supabase.auth.signUp({
-          email: email.trim().toLowerCase(),
-          password: password,
-          phone: mobileNo,
-          options: {
-            data: {
-              name: name.trim(),
-            },
-          },
-        });
+        const { data: authData, error: authError } = await supabase.auth.signUp(
+          {
+            email: email.trim().toLowerCase(),
+            password: password,
+          }
+        );
 
-        if (error) {
+        if (authError) {
           return {
             error: {
-              message: error.message,
+              message: authError.message,
+            },
+          };
+        }
+
+        if (authData.user) {
+          const { data: profileData, error: profileError } = await supabase
+            .from("profiles")
+            .insert([
+              {
+                id: authData.user.id,
+                name: name.trim(),
+                email: email.trim().toLowerCase(),
+                mobileNo: mobileNo,
+              },
+            ])
+            .select();
+
+          if (profileError) {
+            return {
+              error: {
+                message: profileError.message,
+              },
+            };
+          }
+
+          return {
+            data: {
+              user: authData.user,
+              profile: profileData?.[0],
             },
           };
         }
 
         return {
-          data,
+          error: {
+            message: "User creation failed",
+          },
         };
       },
     }),
