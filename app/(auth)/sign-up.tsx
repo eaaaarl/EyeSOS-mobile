@@ -2,10 +2,11 @@ import CustomButton from "@/components/CustomButton";
 import InputField from "@/components/InputFields";
 import OAuth from "@/components/OAuth";
 import { icons } from "@/constant/icon";
+import { image } from "@/constant/image";
 
 import { Link } from "expo-router";
 import { useCallback, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Image, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const SignUp = () => {
@@ -29,12 +30,12 @@ const SignUp = () => {
     >
       <View className="flex-1 bg-white">
         <View className="relative w-full h-[250px]">
-          {/* <Image source={images.baobaoAuth} className="z-0 w-full h-[250px]" /> */}
-          <Text className="text-2xl text-black font-semibold absolute bottom-5 left-5">
-            Create Your Account
-          </Text>
+          <Image source={image.logo} className="z-0 w-full h-[250px]" />
         </View>
         <View className="p-5">
+          <Text className="text-2xl text-black font-semibold">
+            Create Your Account
+          </Text>
           <InputField
             label="Name"
             placeholder="Enter full name"
