@@ -7,6 +7,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function Camera() {
   const insets = useSafeAreaInsets();
+
   const [facing, setFacing] = useState<CameraType>('back');
   const [permission, requestPermission] = useCameraPermissions();
   const [photo, setPhoto] = useState<string | null>(null);
@@ -47,6 +48,7 @@ export default function Camera() {
         const photo = await cameraRef.current.takePictureAsync({
           quality: 0.8,
         });
+        console.log('photo take picture', photo)
         setPhoto(photo?.uri || null);
       } catch (error) {
         Alert.alert('Error', 'Failed to take picture');
@@ -70,14 +72,14 @@ export default function Camera() {
     // Navigate to report screen with photo
     Alert.alert('Success', 'Photo will be used for incident report');
     // TODO: Navigate to report screen with photo URI
+    console.log('photo uri', photo)
+
   };
 
   if (photo) {
     return (
       <View className="flex-1 bg-black">
         <Image source={{ uri: photo }} className="flex-1" resizeMode="contain" />
-
-        {/* Top Bar */}
         <SafeAreaView className="absolute top-0 left-0 right-0">
           <View className="px-4 py-3">
             <TouchableOpacity
@@ -111,6 +113,7 @@ export default function Camera() {
       </View>
     );
   }
+
 
   return (
     <View className="flex-1 bg-black">
@@ -172,11 +175,9 @@ export default function Camera() {
             </View>
           </View>
 
-          {/* Camera Controls */}
           <View className="flex-row items-center justify-between">
             <View className="w-16" />
 
-            {/* Capture Button */}
             <TouchableOpacity
               onPress={takePicture}
               className="w-20 h-20 rounded-full bg-white items-center justify-center border-4 border-gray-300"
@@ -184,7 +185,6 @@ export default function Camera() {
               <View className="w-16 h-16 rounded-full bg-white border-4 border-[#E63946]" />
             </TouchableOpacity>
 
-            {/* Flip Camera */}
             <TouchableOpacity
               onPress={toggleCameraFacing}
               className="w-16 h-16 bg-black/50 rounded-full items-center justify-center"

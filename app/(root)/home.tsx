@@ -1,15 +1,103 @@
 import ChatModal from "@/feature/home/components/ChatModal";
-import ReportIncidentModal from "@/feature/home/components/ReportIncidentModal";
+import ReportIncidentModal, { ReportData } from "@/feature/home/components/ReportIncidentModal";
+import { useAppSelector } from "@/lib/redux/hooks";
 import { Ionicons } from "@expo/vector-icons";
+import * as Location from 'expo-location';
 import { router } from "expo-router";
-import { useState } from "react";
-import { Image, ScrollView, StatusBar, Text, TouchableOpacity, View } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { Alert, Image, ScrollView, StatusBar, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Index() {
+  const user = useAppSelector((state) => state.auth)
+
   const insets = useSafeAreaInsets()
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [chatModalVisible, setChatModalVisible] = useState(false);
+  const [hasPermission, setHasPermission] = useState(false);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+
+  const [userCurrentLocation, setUserCurrentLocation] = useState({
+    latitude: 0,
+    longitude: 0,
+    address: ''
+  })
+
+  const requestLocationPermission = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      setHasPermission(status === 'granted');
+      return status === 'granted';
+    } catch (error) {
+      console.log('Permission error:', error);
+      return false;
+    }
+  };
+
+  const getCurrentLocation = useCallback(async () => {
+    if (!user) return;
+
+    setIsLoadingLocation(true);
+    try {
+      const hasPermission = await requestLocationPermission();
+      if (!hasPermission) {
+        Alert.alert(
+          'Location Permission Required',
+          'Please enable location permissions to see your current location and find nearby rides.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: () => Location.requestForegroundPermissionsAsync() }
+          ]
+        );
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+
+      const address = await Location.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+
+      setUserCurrentLocation({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        address: address[0]?.street || address[0]?.city || address[0]?.name || 'Unknown location'
+      })
+
+    } catch (error) {
+      console.log('Location error:', error);
+      Alert.alert(
+        'Location Error',
+        'Unable to get your current location. Please try again or check your location settings.'
+      );
+    } finally {
+      setIsLoadingLocation(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      getCurrentLocation();
+    }
+  }, [user, getCurrentLocation]);
+
+
+  const handleSubmitReport = async (data: ReportData) => {
+    try {
+      console.log('Report Data:', data);
+      alert('Report submitted successfully!');
+
+      // Close modal
+      setReportModalVisible(false);
+    } catch (error) {
+      console.error('Error submitting report:', error);
+      alert('Failed to submit report');
+    }
+  }
+
 
   const reports = [
     {
@@ -177,6 +265,8 @@ export default function Index() {
         onClose={() => setReportModalVisible(false)}
         visible={reportModalVisible}
         onRoute={() => router.push('/(root)/camera')}
+        location={userCurrentLocation}
+        onSubmit={handleSubmitReport}
       />
 
       <ChatModal

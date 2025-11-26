@@ -1,14 +1,60 @@
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
-import { Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 interface ReportIncidentModalProps {
   visible: boolean;
   onClose: () => void;
   onRoute: () => void;
+  onSubmit: (data: ReportData) => void;
+  location: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  }
 }
 
-export default function ReportIncidentModal({ onClose, visible, onRoute }: ReportIncidentModalProps) {
+export type SeverityLevel = 'low' | 'moderate' | 'high' | 'critical';
+
+export interface ReportData {
+  photoUri: string;
+  description: string;
+  severity: SeverityLevel;
+  location: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  };
+}
+
+const severityOptions = [
+  { value: 'low' as SeverityLevel, label: 'Low', color: '#10B981', icon: 'information-circle' },
+  { value: 'moderate' as SeverityLevel, label: 'Moderate', color: '#F59E0B', icon: 'warning' },
+  { value: 'high' as SeverityLevel, label: 'High', color: '#EF4444', icon: 'alert-circle' },
+  { value: 'critical' as SeverityLevel, label: 'Critical', color: '#DC2626', icon: 'skull' },
+];
+
+export default function ReportIncidentModal({ onClose, visible, onRoute, onSubmit, location }: ReportIncidentModalProps) {
+  const [description, setDescription] = useState('');
+  const [photoUri, setPhotoUri] = useState<string>('');
+  const [severity, setSeverity] = useState<SeverityLevel>('low');
+  const [showSeverityDropdown, setShowSeverityDropdown] = useState(false);
+
+  const handleSubmit = () => {
+    const reportData: ReportData = {
+      photoUri,
+      description,
+      severity,
+      location
+    };
+    onSubmit(reportData);
+    setDescription('');
+    setPhotoUri('');
+    setSeverity('low');
+  };
+
+  const selectedSeverity = severityOptions.find(opt => opt.value === severity);
+
   return (
     <Modal
       visible={visible}
@@ -24,12 +70,15 @@ export default function ReportIncidentModal({ onClose, visible, onRoute }: Repor
               <Ionicons name="close" size={24} color="#4B5563" />
             </TouchableOpacity>
           </View>
-
           <ScrollView className="p-4">
             <View className="gap-4">
               <View>
                 <Text className="text-sm font-medium text-gray-700 mb-2">Upload Photo</Text>
-                <TouchableOpacity onPress={onRoute} className="border-2 border-dashed border-gray-300 rounded-lg p-8 items-center active:border-[#E63946]">
+                <TouchableOpacity
+                  style={{ padding: 18 }}
+                  onPress={onRoute}
+                  className="border-2 border-dashed border-gray-300 rounded-lg items-center active:border-[#E63946]"
+                >
                   <Ionicons name="camera" size={48} color="#9CA3AF" />
                   <Text className="text-sm text-gray-600 mt-2 font-semibold">
                     Click to take photo or upload image
@@ -38,34 +87,98 @@ export default function ReportIncidentModal({ onClose, visible, onRoute }: Repor
               </View>
 
               <View>
+                <Text className="text-sm font-medium text-gray-700 mb-2">Severity Level</Text>
+                <TouchableOpacity
+                  onPress={() => setShowSeverityDropdown(!showSeverityDropdown)}
+                  className="px-4 py-3 border border-gray-300 rounded-lg flex-row items-center justify-between"
+                >
+                  <View className="flex-row items-center gap-2">
+                    <Ionicons
+                      name={selectedSeverity?.icon as any}
+                      size={20}
+                      color={selectedSeverity?.color}
+                    />
+                    <Text style={{ color: selectedSeverity?.color }} className="font-semibold">
+                      {selectedSeverity?.label}
+                    </Text>
+                  </View>
+                  <Ionicons
+                    name={showSeverityDropdown ? "chevron-up" : "chevron-down"}
+                    size={20}
+                    color="#9CA3AF"
+                  />
+                </TouchableOpacity>
+
+                {showSeverityDropdown && (
+                  <View className="mt-2 border border-gray-200 rounded-lg overflow-hidden">
+                    {severityOptions.map((option, index) => (
+                      <TouchableOpacity
+                        key={option.value}
+                        onPress={() => {
+                          setSeverity(option.value);
+                          setShowSeverityDropdown(false);
+                        }}
+                        className={`px-4 py-3 flex-row items-center gap-3 ${index !== severityOptions.length - 1 ? 'border-b border-gray-200' : ''
+                          } ${severity === option.value ? 'bg-gray-50' : 'bg-white'} active:bg-gray-100`}
+                      >
+                        <Ionicons name={option.icon as any} size={20} color={option.color} />
+                        <Text style={{ color: option.color }} className="font-semibold flex-1">
+                          {option.label}
+                        </Text>
+                        {severity === option.value && (
+                          <Ionicons name="checkmark-circle" size={20} color={option.color} />
+                        )}
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+
+                <Text className="text-xs text-gray-500 mt-2">
+                  {severity === 'low' && 'Minor issue, no immediate danger'}
+                  {severity === 'moderate' && 'Requires attention, potential risk'}
+                  {severity === 'high' && 'Serious situation, urgent response needed'}
+                  {severity === 'critical' && 'Life-threatening emergency, immediate action required'}
+                </Text>
+              </View>
+
+              <View>
                 <Text className="text-sm font-medium text-gray-700 mb-2">Location</Text>
                 <View className="flex-row gap-2">
                   <View className="flex-1 px-4 py-3 border border-gray-300 rounded-lg">
-                    <Text className="text-gray-500">Address or location</Text>
+                    <Text className="text-gray-500">{location.address}</Text>
                   </View>
                   <TouchableOpacity className="px-4 py-3 bg-gray-100 active:bg-gray-200 rounded-lg">
                     <Ionicons name="location" size={20} color="#4B5563" />
                   </TouchableOpacity>
                 </View>
                 <Text className="text-xs text-gray-500 mt-1">
-                  Your coordinates will be automatically sent to MDRRMC
+                  latitude: {location.latitude}, longitude: {location.longitude}
                 </Text>
               </View>
 
               <View>
                 <Text className="text-sm font-medium text-gray-700 mb-2">Description</Text>
-                <View className="px-4 py-3 border border-gray-300 rounded-lg min-h-[100px]">
-                  <Text className="text-gray-500">Describe what you see...</Text>
-                </View>
+                <TextInput
+                  className="px-4 py-3 border border-gray-300 rounded-lg min-h-[100px]"
+                  placeholder="Describe what you see..."
+                  placeholderTextColor="#9CA3AF"
+                  multiline
+                  textAlignVertical="top"
+                  value={description}
+                  onChangeText={setDescription}
+                />
               </View>
 
-              <TouchableOpacity className="bg-[#E63946] active:bg-[#D32F2F] py-3 rounded-lg items-center">
-                <Text className="text-white font-semibold">Send Report to MDRRMC</Text>
+              <TouchableOpacity
+                className="bg-[#E63946] active:bg-[#D32F2F] py-3 rounded-lg items-center"
+                onPress={handleSubmit}
+              >
+                <Text className="text-white font-semibold">Submit Report</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
         </View>
       </View>
     </Modal>
-  )
+  );
 }
