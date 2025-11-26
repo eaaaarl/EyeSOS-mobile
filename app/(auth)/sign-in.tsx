@@ -37,7 +37,6 @@ const SignIn = () => {
       password: "",
     };
 
-    // Email validation
     if (!form.email.trim()) {
       newErrors.email = "Email is required";
       isValid = false;
@@ -46,7 +45,6 @@ const SignIn = () => {
       isValid = false;
     }
 
-    // Password validation
     if (!form.password) {
       newErrors.password = "Password is required";
       isValid = false;
@@ -60,13 +58,11 @@ const SignIn = () => {
   }, [form.email, form.password]);
 
   const onSignInPress = useCallback(async () => {
-    // Clear previous errors
     setErrors({
       email: "",
       password: "",
     });
 
-    // Validate form
     if (!validateForm()) {
       return;
     }
@@ -87,7 +83,6 @@ const SignIn = () => {
           [{ text: "OK" }]
         );
       } else if ('data' in res) {
-        // Success - redirect to home
         router.replace("/(root)/home");
       }
     } catch (error) {
@@ -113,7 +108,7 @@ const SignIn = () => {
           </View>
           <View className="p-5">
             <Text className="text-2xl text-black font-semibold mb-6">
-              Welcome Back
+              Sign in
             </Text>
 
             <InputField

@@ -33,7 +33,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
           dispatch(setUser({ email: session.user.email, id: session.user.id }))
           router.replace('/(root)/home')
         } else {
-          router.replace('/(auth)/sign-in')
+          router.replace('/(auth)/welcome')
         }
       }
     )
