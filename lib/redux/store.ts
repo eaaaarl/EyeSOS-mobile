@@ -16,7 +16,7 @@ const persistConfig = {
   key: "root",
   storage: AsyncStorage,
   version: 1,
-  blacklist: [...apisReducerPath],
+  blacklist: ["photo", ...apisReducerPath],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

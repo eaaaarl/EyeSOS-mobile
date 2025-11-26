@@ -1,13 +1,104 @@
+import ChatModal from "@/feature/home/components/ChatModal";
+import ReportIncidentModal, { ReportData } from "@/feature/home/components/ReportIncidentModal";
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import { clearPhotoUri } from "@/lib/redux/state/photoSlice";
 import { Ionicons } from "@expo/vector-icons";
+import * as Location from 'expo-location';
 import { router } from "expo-router";
-import { useState } from "react";
-import { Image, Modal, ScrollView, StatusBar, Text, TouchableOpacity, View } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { Alert, Image, ScrollView, StatusBar, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Index() {
+  const dispatch = useAppDispatch()
+  const user = useAppSelector((state) => state.auth)
   const insets = useSafeAreaInsets()
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [chatModalVisible, setChatModalVisible] = useState(false);
+  const [hasPermission, setHasPermission] = useState(false);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+
+  const [userCurrentLocation, setUserCurrentLocation] = useState({
+    latitude: 0,
+    longitude: 0,
+    address: ''
+  })
+
+  const requestLocationPermission = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      setHasPermission(status === 'granted');
+      return status === 'granted';
+    } catch (error) {
+      console.log('Permission error:', error);
+      return false;
+    }
+  };
+
+  const getCurrentLocation = useCallback(async () => {
+    if (!user) return;
+
+    setIsLoadingLocation(true);
+    try {
+      const hasPermission = await requestLocationPermission();
+      if (!hasPermission) {
+        Alert.alert(
+          'Location Permission Required',
+          'Please enable location permissions to see your current location and find nearby rides.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: () => Location.requestForegroundPermissionsAsync() }
+          ]
+        );
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+
+      const address = await Location.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+
+      setUserCurrentLocation({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        address: address[0]?.street || address[0]?.city || address[0]?.name || 'Unknown location'
+      })
+
+    } catch (error) {
+      console.log('Location error:', error);
+      Alert.alert(
+        'Location Error',
+        'Unable to get your current location. Please try again or check your location settings.'
+      );
+    } finally {
+      setIsLoadingLocation(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      getCurrentLocation();
+    }
+  }, [user, getCurrentLocation]);
+
+
+  const handleSubmitReport = async (data: ReportData) => {
+    try {
+      console.log('Report Data:', data);
+      alert('Report submitted successfully!');
+
+      setReportModalVisible(false);
+      dispatch(clearPhotoUri())
+    } catch (error) {
+      console.error('Error submitting report:', error);
+      alert('Failed to submit report');
+    }
+  }
+
 
   const reports = [
     {
@@ -52,7 +143,6 @@ export default function Index() {
     <View className="flex-1 bg-gray-50">
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-      {/* Header */}
       <View className="bg-white px-4 py-3 flex-row items-center justify-between border-b border-gray-100" style={{ marginTop: insets.top }}>
         <View className="flex-row items-center gap-2">
           <View className="w-10 h-10 bg-[#E63946] rounded-lg items-center justify-center">
@@ -66,7 +156,6 @@ export default function Index() {
       </View>
 
       <ScrollView className="flex-1">
-        {/* Welcome Banner */}
         <View className="bg-[#E63946] mx-4 mt-6 mb-6 p-6 rounded-lg">
           <Text className="text-2xl font-bold text-white mb-2">Report an Incident</Text>
           <Text className="text-white opacity-90">
@@ -74,20 +163,6 @@ export default function Index() {
           </Text>
         </View>
 
-        {/* Alert Banner */}
-        {/* <View className="bg-yellow-50 border-l-4 border-yellow-400 mx-4 mb-6 p-4 rounded-r-lg">
-          <View className="flex-row items-start">
-            <Ionicons name="warning" size={24} color="#F59E0B" style={{ marginRight: 12 }} />
-            <View className="flex-1">
-              <Text className="font-semibold text-yellow-800">Tropical Storm Warning</Text>
-              <Text className="text-sm text-yellow-700 mt-1">
-                Heavy rainfall expected in Metro Manila. Stay updated and prepare emergency supplies.
-              </Text>
-            </View>
-          </View>
-        </View> */}
-
-        {/* Quick Report Button */}
         <View className="mx-4 mb-4">
           <TouchableOpacity
             onPress={() => setReportModalVisible(true)}
@@ -98,7 +173,6 @@ export default function Index() {
           </TouchableOpacity>
         </View>
 
-        {/* Emergency Call Button */}
         <View className="mx-4 mb-6">
           <TouchableOpacity
             onPress={() => router.push('/(root)/alert')}
@@ -109,7 +183,6 @@ export default function Index() {
           </TouchableOpacity>
         </View>
 
-        {/* My Reports */}
         <View className="bg-white mx-4 mb-6 rounded-lg shadow-sm">
           <View className="p-4 border-b border-gray-200 flex-row items-center justify-between">
             <Text className="text-lg font-bold text-gray-900">My Reports</Text>
@@ -157,7 +230,6 @@ export default function Index() {
           ))}
         </View>
 
-        {/* Emergency Contacts */}
         <View className="bg-white mx-4 mb-6 rounded-lg shadow-sm">
           <View className="p-4 border-b border-gray-200">
             <Text className="text-lg font-bold text-gray-900">Emergency Contacts</Text>
@@ -190,147 +262,18 @@ export default function Index() {
         </View>
       </ScrollView>
 
-      {/* Report Modal */}
-      <Modal
+      <ReportIncidentModal
+        onClose={() => setReportModalVisible(false)}
         visible={reportModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setReportModalVisible(false)}
-      >
-        <View className="flex-1 bg-black/50 justify-end">
-          <View className="bg-white rounded-t-3xl max-h-[90%]">
-            <View className="p-4 border-b border-gray-200 flex-row items-center justify-between">
-              <Text className="text-lg font-bold text-gray-900">Report Incident</Text>
-              <TouchableOpacity onPress={() => setReportModalVisible(false)} className="p-1">
-                <Ionicons name="close" size={24} color="#4B5563" />
-              </TouchableOpacity>
-            </View>
+        onRoute={() => router.push('/(root)/camera')}
+        location={userCurrentLocation}
+        onSubmit={handleSubmitReport}
+      />
 
-            <ScrollView className="p-4">
-              <View className="gap-4">
-                {/* Photo Upload */}
-                <View>
-                  <Text className="text-sm font-medium text-gray-700 mb-2">Upload Photo</Text>
-                  <TouchableOpacity onPress={() => router.push('/(root)/camera')} className="border-2 border-dashed border-gray-300 rounded-lg p-8 items-center active:border-[#E63946]">
-                    <Ionicons name="camera" size={48} color="#9CA3AF" />
-                    <Text className="text-sm text-gray-600 mt-2 font-semibold">
-                      Click to take photo or upload image
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-                {/* Location */}
-                <View>
-                  <Text className="text-sm font-medium text-gray-700 mb-2">Location</Text>
-                  <View className="flex-row gap-2">
-                    <View className="flex-1 px-4 py-3 border border-gray-300 rounded-lg">
-                      <Text className="text-gray-500">Address or location</Text>
-                    </View>
-                    <TouchableOpacity className="px-4 py-3 bg-gray-100 active:bg-gray-200 rounded-lg">
-                      <Ionicons name="location" size={20} color="#4B5563" />
-                    </TouchableOpacity>
-                  </View>
-                  <Text className="text-xs text-gray-500 mt-1">
-                    Your coordinates will be automatically sent to MDRRMC
-                  </Text>
-                </View>
-
-                {/* Description */}
-                <View>
-                  <Text className="text-sm font-medium text-gray-700 mb-2">Description</Text>
-                  <View className="px-4 py-3 border border-gray-300 rounded-lg min-h-[100px]">
-                    <Text className="text-gray-500">Describe what you see...</Text>
-                  </View>
-                </View>
-
-                {/* Submit Button */}
-                <TouchableOpacity className="bg-[#E63946] active:bg-[#D32F2F] py-3 rounded-lg items-center">
-                  <Text className="text-white font-semibold">Send Report to MDRRMC</Text>
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Chat Modal */}
-      <Modal
+      <ChatModal
+        onClose={() => setChatModalVisible(false)}
         visible={chatModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setChatModalVisible(false)}
-      >
-        <View className="flex-1 bg-black/50 justify-end">
-          <View className="bg-white rounded-t-3xl h-[80%]">
-            <View className="p-4 border-b border-gray-200 flex-row items-center justify-between">
-              <View>
-                <Text className="font-bold text-gray-900">MDRRMC Response Team</Text>
-                <Text className="text-xs text-green-600">● Online</Text>
-              </View>
-              <TouchableOpacity onPress={() => setChatModalVisible(false)} className="p-1">
-                <Ionicons name="close" size={24} color="#4B5563" />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView className="flex-1 p-4 bg-gray-50">
-              {/* MDRRMC Message */}
-              <View className="flex-row gap-2 mb-4">
-                <View className="w-8 h-8 bg-blue-600 rounded-full items-center justify-center">
-                  <Text className="text-white text-xs font-semibold">MD</Text>
-                </View>
-                <View className="flex-1">
-                  <View className="bg-white rounded-lg p-3 shadow-sm">
-                    <Text className="text-sm text-gray-900">
-                      Thank you for your report. We have received your location and photo. Our team is
-                      assessing the situation.
-                    </Text>
-                  </View>
-                  <Text className="text-xs text-gray-500 mt-1">2 hours ago</Text>
-                </View>
-              </View>
-
-              {/* User Message */}
-              <View className="flex-row justify-end mb-4">
-                <View className="items-end max-w-[80%]">
-                  <View className="bg-[#E63946] rounded-lg p-3 shadow-sm">
-                    <Text className="text-sm text-white">
-                      The water level is rising quickly. Several cars are stuck.
-                    </Text>
-                  </View>
-                  <Text className="text-xs text-gray-500 mt-1">1 hour ago</Text>
-                </View>
-              </View>
-
-              {/* MDRRMC Message */}
-              <View className="flex-row gap-2 mb-4">
-                <View className="w-8 h-8 bg-blue-600 rounded-full items-center justify-center">
-                  <Text className="text-white text-xs font-semibold">MD</Text>
-                </View>
-                <View className="flex-1">
-                  <View className="bg-white rounded-lg p-3 shadow-sm">
-                    <Text className="text-sm text-gray-900">
-                      Emergency response team has been dispatched to your location. ETA 15 minutes.
-                      Please stay in a safe area.
-                    </Text>
-                  </View>
-                  <Text className="text-xs text-gray-500 mt-1">50 minutes ago</Text>
-                </View>
-              </View>
-            </ScrollView>
-
-            <View className="p-4 border-t border-gray-200">
-              <View className="flex-row gap-2">
-                <View className="flex-1 px-4 py-3 border border-gray-300 rounded-lg">
-                  <Text className="text-gray-500">Type a message...</Text>
-                </View>
-                <TouchableOpacity className="px-4 py-3 bg-[#E63946] active:bg-[#D32F2F] rounded-lg items-center justify-center">
-                  <Ionicons name="send" size={20} color="white" />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      />
     </View>
   );
 }
