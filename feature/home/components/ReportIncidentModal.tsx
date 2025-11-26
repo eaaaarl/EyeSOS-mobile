@@ -1,6 +1,8 @@
+import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks';
+import { clearPhotoUri } from '@/lib/redux/state/photoSlice';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 interface ReportIncidentModalProps {
   visible: boolean;
@@ -17,7 +19,7 @@ interface ReportIncidentModalProps {
 export type SeverityLevel = 'low' | 'moderate' | 'high' | 'critical';
 
 export interface ReportData {
-  photoUri: string;
+  photoUri: string | null;
   description: string;
   severity: SeverityLevel;
   location: {
@@ -35,21 +37,21 @@ const severityOptions = [
 ];
 
 export default function ReportIncidentModal({ onClose, visible, onRoute, onSubmit, location }: ReportIncidentModalProps) {
+  const dispatch = useAppDispatch()
+  const { photoUri } = useAppSelector((state) => state.photo)
   const [description, setDescription] = useState('');
-  const [photoUri, setPhotoUri] = useState<string>('');
   const [severity, setSeverity] = useState<SeverityLevel>('low');
   const [showSeverityDropdown, setShowSeverityDropdown] = useState(false);
 
   const handleSubmit = () => {
     const reportData: ReportData = {
-      photoUri,
+      photoUri: photoUri,
       description,
       severity,
       location
     };
     onSubmit(reportData);
     setDescription('');
-    setPhotoUri('');
     setSeverity('low');
   };
 
@@ -74,16 +76,40 @@ export default function ReportIncidentModal({ onClose, visible, onRoute, onSubmi
             <View className="gap-4">
               <View>
                 <Text className="text-sm font-medium text-gray-700 mb-2">Upload Photo</Text>
-                <TouchableOpacity
-                  style={{ padding: 18 }}
-                  onPress={onRoute}
-                  className="border-2 border-dashed border-gray-300 rounded-lg items-center active:border-[#E63946]"
-                >
-                  <Ionicons name="camera" size={48} color="#9CA3AF" />
-                  <Text className="text-sm text-gray-600 mt-2 font-semibold">
-                    Click to take photo or upload image
-                  </Text>
-                </TouchableOpacity>
+                {photoUri ? (
+                  <View className="relative">
+                    <Image
+                      source={{ uri: photoUri }}
+                      className="w-full h-48 rounded-lg"
+                      resizeMode="cover"
+                    />
+                    <TouchableOpacity
+                      onPress={() => dispatch(clearPhotoUri())}
+                      className="absolute top-2 right-2 bg-black/60 rounded-full p-2"
+                    >
+                      <Ionicons name="close" size={20} color="white" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={onRoute}
+                      className="absolute top-3 left-3 bg-[#E63946] rounded-full px-3 py-2 flex-row items-center gap-1"
+                    >
+                      <Ionicons name="camera" size={16} color="white" />
+                      <Text className="text-white text-xs font-semibold">Retake</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  // Show upload button
+                  <TouchableOpacity
+                    style={{ padding: 18 }}
+                    onPress={onRoute}
+                    className="border-2 border-dashed border-gray-300 rounded-lg items-center active:border-[#E63946]"
+                  >
+                    <Ionicons name="camera" size={48} color="#9CA3AF" />
+                    <Text className="text-sm text-gray-600 mt-2 font-semibold">
+                      Click to take photo or upload image
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
 
               <View>

@@ -1,6 +1,7 @@
 import ChatModal from "@/feature/home/components/ChatModal";
 import ReportIncidentModal, { ReportData } from "@/feature/home/components/ReportIncidentModal";
-import { useAppSelector } from "@/lib/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import { clearPhotoUri } from "@/lib/redux/state/photoSlice";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from 'expo-location';
 import { router } from "expo-router";
@@ -9,8 +10,8 @@ import { Alert, Image, ScrollView, StatusBar, Text, TouchableOpacity, View } fro
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Index() {
+  const dispatch = useAppDispatch()
   const user = useAppSelector((state) => state.auth)
-
   const insets = useSafeAreaInsets()
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [chatModalVisible, setChatModalVisible] = useState(false);
@@ -90,8 +91,8 @@ export default function Index() {
       console.log('Report Data:', data);
       alert('Report submitted successfully!');
 
-      // Close modal
       setReportModalVisible(false);
+      dispatch(clearPhotoUri())
     } catch (error) {
       console.error('Error submitting report:', error);
       alert('Failed to submit report');

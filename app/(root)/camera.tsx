@@ -1,12 +1,14 @@
+import { useAppDispatch } from '@/lib/redux/hooks';
+import { setPhotoUri } from '@/lib/redux/state/photoSlice';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import { router } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import { Alert, Image, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Camera() {
-  const insets = useSafeAreaInsets();
+  const dispatch = useAppDispatch()
 
   const [facing, setFacing] = useState<CameraType>('back');
   const [permission, requestPermission] = useCameraPermissions();
@@ -51,6 +53,7 @@ export default function Camera() {
         console.log('photo take picture', photo)
         setPhoto(photo?.uri || null);
       } catch (error) {
+        console.error(error)
         Alert.alert('Error', 'Failed to take picture');
       }
     }
@@ -69,11 +72,10 @@ export default function Camera() {
   };
 
   const usePhoto = () => {
-    // Navigate to report screen with photo
-    Alert.alert('Success', 'Photo will be used for incident report');
-    // TODO: Navigate to report screen with photo URI
-    console.log('photo uri', photo)
-
+    if (photo) {
+      dispatch(setPhotoUri(photo))
+      router.back()
+    }
   };
 
   if (photo) {
