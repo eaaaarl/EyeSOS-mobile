@@ -8,6 +8,7 @@ import { SendReportPayload } from "../interface/send-report.interface";
 export const homeApi = createApi({
   reducerPath: "homeApi",
   baseQuery: fakeBaseQuery(),
+  tagTypes: ["getReports"],
   endpoints: (builder) => ({
     sendReport: builder.mutation<any, SendReportPayload>({
       queryFn: async (payload) => {
@@ -63,6 +64,7 @@ export const homeApi = createApi({
           },
         };
       },
+      invalidatesTags: ["getReports"],
     }),
 
     getReports: builder.query<ReportsResponse, { userId: string }>({
@@ -70,7 +72,8 @@ export const homeApi = createApi({
         const { data, error } = await supabase
           .from("accidents")
           .select("*")
-          .eq("reported_by", userId);
+          .eq("reported_by", userId)
+          .order("created_at", { ascending: false });
 
         if (error) {
           return {
@@ -90,6 +93,7 @@ export const homeApi = createApi({
           },
         };
       },
+      providesTags: ["getReports"],
     }),
   }),
 });

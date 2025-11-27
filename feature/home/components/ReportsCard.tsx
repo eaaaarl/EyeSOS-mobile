@@ -132,7 +132,7 @@ export default function ReportsCard({
                       Road Accident
                     </Text>
                     <Text style={{ lineHeight: 16 }} className="text-xs text-gray-500">
-                      Report #{report.report_number}
+                      ID: {report.report_number}
                     </Text>
                   </View>
                   <View

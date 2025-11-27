@@ -1,4 +1,5 @@
 import { useGetProfilesQuery, useSignOutMutation } from '@/feature/auth/api/authApi';
+import { useGetReportsQuery } from '@/feature/home/api/homeApi';
 import { useAppSelector } from '@/lib/redux/hooks';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
@@ -17,13 +18,28 @@ export default function Profile() {
   const insets = useSafeAreaInsets();
 
   const currentUser = useAppSelector((state) => state.auth);
-  const [signOut] = useSignOutMutation()
+
+  // Get Reports Accidents by User Id
+  const { data: accidentsReports, isLoading: accidentsReportsLoading } = useGetReportsQuery({
+    userId: currentUser.id
+  })
+
+  // Get Profile By Id
   const { data: user, isLoading } = useGetProfilesQuery({ id: currentUser.id }, {
     skip: !currentUser.id
   });
+
+  // Signout Mutation
+  const [signOut] = useSignOutMutation()
+
+
   const handleSignOut = async () => {
     await signOut()
   }
+
+  const totalReports = accidentsReports?.reports.length
+
+  const initialLoading = isLoading || accidentsReportsLoading;
   return (
     <View className="flex-1 bg-gray-50">
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
@@ -61,17 +77,17 @@ export default function Profile() {
           <Text className="text-lg font-bold text-gray-900 mb-4">My Activity</Text>
           <View className="flex-row">
             <View className="flex-1 items-center">
-              <Text className="text-3xl font-bold text-[#E63946]">12</Text>
+              <Text className="text-3xl font-bold text-[#E63946]">{totalReports}</Text>
               <Text className="text-sm text-gray-600 font-normal mt-1">Reports</Text>
             </View>
             <View className="w-px bg-gray-200" />
             <View className="flex-1 items-center">
-              <Text className="text-3xl font-bold text-green-600">8</Text>
+              <Text className="text-3xl font-bold text-green-600">0</Text>
               <Text className="text-sm text-gray-600 font-normal mt-1">Resolved</Text>
             </View>
             <View className="w-px bg-gray-200" />
             <View className="flex-1 items-center">
-              <Text className="text-3xl font-bold text-yellow-600">4</Text>
+              <Text className="text-3xl font-bold text-yellow-600">0</Text>
               <Text className="text-sm text-gray-600 font-normal mt-1">Pending</Text>
             </View>
           </View>
@@ -203,7 +219,7 @@ export default function Profile() {
 
       <Modal
         transparent
-        visible={isLoading}
+        visible={initialLoading}
         animationType="fade"
       >
         <View
