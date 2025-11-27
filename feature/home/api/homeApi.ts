@@ -2,11 +2,13 @@ import { supabase } from "@/lib/supabase";
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
 import { decode } from "base64-arraybuffer";
 import * as FileSystem from "expo-file-system/legacy";
+import { ReportsResponse } from "../interface/get-reports.interface";
 import { SendReportPayload } from "../interface/send-report.interface";
 
 export const homeApi = createApi({
   reducerPath: "homeApi",
   baseQuery: fakeBaseQuery(),
+  tagTypes: ["getReports"],
   endpoints: (builder) => ({
     sendReport: builder.mutation<any, SendReportPayload>({
       queryFn: async (payload) => {
@@ -62,8 +64,38 @@ export const homeApi = createApi({
           },
         };
       },
+      invalidatesTags: ["getReports"],
+    }),
+
+    getReports: builder.query<ReportsResponse, { userId: string }>({
+      queryFn: async ({ userId }) => {
+        const { data, error } = await supabase
+          .from("accidents")
+          .select("*")
+          .eq("reported_by", userId)
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          return {
+            error: {
+              error: error.message,
+            },
+          };
+        }
+
+        return {
+          data: {
+            reports: data,
+            meta: {
+              success: true,
+              message: "Reports Fetched",
+            },
+          },
+        };
+      },
+      providesTags: ["getReports"],
     }),
   }),
 });
 
-export const { useSendReportMutation } = homeApi;
+export const { useSendReportMutation, useGetReportsQuery } = homeApi;

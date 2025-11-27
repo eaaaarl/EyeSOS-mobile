@@ -1,0 +1,191 @@
+import { Ionicons } from "@expo/vector-icons";
+import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Report } from "../interface/get-reports.interface";
+
+interface ReportsProps {
+  accidentsReports?: { reports: Report[] };
+  formatSmartDate: (date: string) => string;
+  onReportPress?: (report: Report) => void;
+}
+
+const getSeverityConfig = (severity: Report["severity"]) => {
+  const configs = {
+    minor: {
+      bg: "bg-blue-50",
+      border: "border-blue-200",
+      text: "text-blue-700",
+      icon: "alert-circle-outline" as const,
+      iconColor: "#2563eb",
+      label: "Minor"
+    },
+    moderate: {
+      bg: "bg-yellow-50",
+      border: "border-yellow-200",
+      text: "text-yellow-700",
+      icon: "warning-outline" as const,
+      iconColor: "#d97706",
+      label: "Moderate"
+    },
+    high: {
+      bg: "bg-orange-50",
+      border: "border-orange-200",
+      text: "text-orange-700",
+      icon: "alert-outline" as const,
+      iconColor: "#ea580c",
+      label: "High"
+    },
+    critical: {
+      bg: "bg-red-50",
+      border: "border-red-200",
+      text: "text-red-700",
+      icon: "alert-circle" as const,
+      iconColor: "#dc2626",
+      label: "Critical"
+    }
+  };
+  return configs[severity];
+};
+
+export default function ReportsCard({
+  accidentsReports,
+  formatSmartDate,
+  onReportPress
+}: ReportsProps) {
+  const reports = accidentsReports?.reports || [];
+
+  if (reports.length === 0) {
+    return (
+      <View className="bg-white rounded-xl shadow-sm" style={{ marginHorizontal: 16, marginBottom: 24 }}>
+        <View className="items-center justify-center" style={{ padding: 32 }}>
+          <View className="bg-gray-100 rounded-full items-center justify-center" style={{ width: 64, height: 64, marginBottom: 12 }}>
+            <Ionicons name="document-text-outline" size={32} color="#9ca3af" />
+          </View>
+          <Text className="text-base font-semibold text-gray-900" style={{ marginBottom: 4 }}>No Reports Yet</Text>
+          <Text className="text-sm text-gray-500 text-center">
+            Your submitted accident reports will appear here
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View className="bg-white rounded-xl shadow-sm overflow-hidden" style={{ marginHorizontal: 16, marginBottom: 24 }}>
+      {/* Header */}
+      <View className="bg-gray-50 border-b border-gray-100 flex-row items-center justify-between" style={{ paddingHorizontal: 16, paddingVertical: 14 }}>
+        <View className="flex-row items-center" style={{ gap: 8 }}>
+          <View className="bg-red-50 rounded-lg items-center justify-center" style={{ width: 32, height: 32 }}>
+            <Ionicons name="document-text" size={18} color="#E63946" />
+          </View>
+          <Text className="text-lg font-bold text-gray-900">My Reports</Text>
+        </View>
+        <View className="bg-gray-100 rounded-full" style={{ paddingHorizontal: 12, paddingVertical: 6 }}>
+          <Text className="text-xs text-gray-700 font-bold">
+            {reports.length} {reports.length === 1 ? 'report' : 'reports'}
+          </Text>
+        </View>
+      </View>
+
+      {/* Reports List */}
+      {reports.map((report, index) => {
+        const severityConfig = getSeverityConfig(report.severity);
+        return (
+          <TouchableOpacity
+            key={report.id}
+            onPress={() => onReportPress?.(report)}
+            activeOpacity={0.7}
+            className={index !== reports.length - 1 ? "border-b border-gray-100" : ""}
+            style={{ padding: 16 }}
+          >
+            <View className="flex-row" style={{ gap: 14 }}>
+              <View className="relative">
+                <Image
+                  source={{ uri: report.imageUrl[0] }}
+                  className="rounded-lg"
+                  style={{ width: 96, height: 96 }}
+                  resizeMode="cover"
+                />
+                {report.imageUrl.length > 1 && (
+                  <View
+                    className="absolute rounded-full flex-row items-center"
+                    style={{
+                      bottom: 8,
+                      right: 8,
+                      paddingHorizontal: 8,
+                      paddingVertical: 2,
+                      gap: 4,
+                      backgroundColor: 'rgba(0, 0, 0, 0.7)'
+                    }}
+                  >
+                    <Ionicons name="images" size={10} color="white" />
+                    <Text className="text-white text-xs font-semibold">
+                      {report.imageUrl.length}
+                    </Text>
+                  </View>
+                )}
+              </View>
+
+              <View className="flex-1">
+                <View className="flex-row items-start justify-between" style={{ marginBottom: 8 }}>
+                  <View className="flex-1" style={{ paddingRight: 4 }}>
+                    <Text className="text-base font-bold text-gray-900" style={{ marginBottom: 2 }}>
+                      Road Accident
+                    </Text>
+                    <Text style={{ lineHeight: 16 }} className="text-xs text-gray-500">
+                      ID: {report.report_number}
+                    </Text>
+                  </View>
+                  <View
+                    className={`${severityConfig.bg} ${severityConfig.border} border rounded-full flex-row items-center`}
+                    style={{ paddingHorizontal: 10, paddingVertical: 4, gap: 4 }}
+                  >
+                    <Ionicons
+                      name={severityConfig.icon}
+                      size={12}
+                      color={severityConfig.iconColor}
+                    />
+                    <Text className={`text-xs font-semibold ${severityConfig.text}`}>
+                      {severityConfig.label}
+                    </Text>
+                  </View>
+                </View>
+
+                <View className="flex-row items-start" style={{ gap: 6, marginBottom: 8 }}>
+                  <Ionicons
+                    name="location"
+                    size={14}
+                    color="#6b7280"
+                    style={{ marginTop: 1 }}
+                  />
+                  <Text className="text-xs text-gray-600 flex-1 leading-4" numberOfLines={2}>
+                    {report.location_address}
+                  </Text>
+                </View>
+
+                {report.reporter_notes && (
+                  <Text className="text-sm text-gray-700 leading-5" style={{ marginBottom: 8 }} numberOfLines={2}>
+                    {report.reporter_notes}
+                  </Text>
+                )}
+
+                <View className="flex-row items-center justify-between" style={{ marginTop: 4 }}>
+                  <View className="flex-row items-center" style={{ gap: 4 }}>
+                    <Ionicons name="time-outline" size={13} color="#9ca3af" />
+                    <Text className="text-xs text-gray-500 font-medium">
+                      {formatSmartDate(report.created_at)}
+                    </Text>
+                  </View>
+
+                  <View className="flex-row items-center" style={{ gap: 4 }}>
+                    <Text className="text-xs text-gray-400">Tap to view</Text>
+                    <Ionicons name="chevron-forward" size={14} color="#9ca3af" />
+                  </View>
+                </View>
+              </View>
+            </View>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+}

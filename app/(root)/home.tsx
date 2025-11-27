@@ -1,25 +1,30 @@
-import { reports } from "@/constant/mock-data";
+import OverlayLoading from "@/components/OverlayLoading";
 import { useGetProfilesQuery } from "@/feature/auth/api/authApi";
-import { useSendReportMutation } from "@/feature/home/api/homeApi";
+import { useGetReportsQuery, useSendReportMutation } from "@/feature/home/api/homeApi";
 import ChatModal from "@/feature/home/components/ChatModal";
 import ReportIncidentModal, { ReportData } from "@/feature/home/components/ReportIncidentModal";
-import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
-import { clearPhotoUri } from "@/lib/redux/state/photoSlice";
+import ReportsCard from "@/feature/home/components/ReportsCard";
+import ReportViewDetails from "@/feature/home/components/ReportViewDetailsModal";
+import { Report } from "@/feature/home/interface/get-reports.interface";
+import { formatSmartDate } from "@/feature/home/utils/date";
+import { useAppSelector } from "@/lib/redux/hooks";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from 'expo-location';
 import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { Alert, Image, ScrollView, StatusBar, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, StatusBar, Text, TouchableOpacity, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Index() {
-  const dispatch = useAppDispatch()
   const user = useAppSelector((state) => state.auth)
   const insets = useSafeAreaInsets()
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [chatModalVisible, setChatModalVisible] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const [userCurrentLocation, setUserCurrentLocation] = useState({
     latitude: 0,
@@ -29,9 +34,16 @@ export default function Index() {
   })
 
   // Get Profiles Users RTK QUERY 
-  const { data: UserProfile } = useGetProfilesQuery({
+  const { data: UserProfile, isLoading: UserProfileLoading } = useGetProfilesQuery({
     id: user.id
   })
+
+  // Get Reports Accidents by User Id
+  const { data: accidentsReports, isLoading: accidentsReportsLoading } = useGetReportsQuery({
+    userId: user.id
+  })
+
+  console.log(JSON.stringify(accidentsReports, null, 2))
 
   const requestLocationPermission = async () => {
     try {
@@ -108,7 +120,7 @@ export default function Index() {
   const handleSubmitReport = async (data: ReportData) => {
     try {
       if (UserProfile) {
-        const res = await sendReport({
+        await sendReport({
           imageUrl: data.photoUri ?? '',
           latitude: data.location.latitude,
           longitude: data.location.longitude,
@@ -119,11 +131,7 @@ export default function Index() {
           reporter_notes: data.description,
           location_address: data.location.full_address
         }).unwrap()
-
-        console.log('res', res)
-        alert('Send report success')
         setReportModalVisible(false);
-        dispatch(clearPhotoUri())
       }
     } catch (error) {
       console.error('Error submitting report:', error);
@@ -131,145 +139,130 @@ export default function Index() {
     }
   }
 
+  // Modal handler for open the View Details reports
+  const handleReportPress = (report: Report) => {
+    setSelectedReport(report);
+    setIsModalVisible(true);
+  };
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
+    // Optional: Clear selected report after animation completes
+    setTimeout(() => setSelectedReport(null), 300);
+  };
 
+  // Loading First load
+  const isInitialLoading =
+    UserProfileLoading ||
+    accidentsReportsLoading ||
+    isLoadingLocation;
 
   return (
-    <View className="flex-1 bg-gray-50">
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+    <GestureHandlerRootView className='flex-1 bg-white'>
+      <View className="flex-1 bg-gray-50">
+        <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-      <View className="bg-white px-4 py-3 flex-row items-center justify-between border-b border-gray-100" style={{ marginTop: insets.top }}>
-        <View className="flex-row items-center gap-2">
-          <View className="w-10 h-10 bg-[#E63946] rounded-lg items-center justify-center">
-            <Text className="text-white text-xl font-bold">E</Text>
-          </View>
-          <Text className="text-xl font-bold text-gray-900">EyeSOS</Text>
-        </View>
-        <TouchableOpacity className="w-10 h-10 bg-gray-100 rounded-full items-center justify-center">
-          <Ionicons name="notifications-outline" size={24} color="#4B5563" />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView className="flex-1">
-        <View className="bg-[#E63946] mx-4 mt-6 mb-6 p-6 rounded-lg">
-          <Text className="text-2xl font-bold text-white mb-2">Report an Incident</Text>
-          <Text className="text-white opacity-90">
-            See a disaster or emergency? Take a photo and send it directly to MDRRMC for immediate response.
-          </Text>
-        </View>
-
-        <View className="mx-4 mb-4">
-          <TouchableOpacity
-            onPress={() => setReportModalVisible(true)}
-            className="bg-[#E63946] active:bg-[#D32F2F] py-4 rounded-lg flex-row items-center justify-center gap-2 shadow-lg"
-          >
-            <Ionicons name="camera" size={24} color="white" />
-            <Text className="text-white font-semibold text-base">Report Incident Now</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View className="mx-4 mb-6">
-          <TouchableOpacity
-            onPress={() => router.push('/(root)/alert')}
-            className="bg-white border-2 border-[#E63946] py-4 rounded-lg flex-row items-center justify-center gap-2 shadow-sm active:bg-red-50"
-          >
-            <Ionicons name="alert-circle" size={24} color="#E63946" />
-            <Text className="text-[#E63946] font-semibold text-base">Send Emergency Alert</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View className="bg-white mx-4 mb-6 rounded-lg shadow-sm">
-          <View className="p-4 border-b border-gray-200 flex-row items-center justify-between">
-            <Text className="text-lg font-bold text-gray-900">My Reports</Text>
-            <Text className="text-sm text-gray-600 font-semibold">3 active</Text>
-          </View>
-
-          {reports.map((report, index) => (
-            <View
-              key={report.id}
-              className={`p-4 ${index !== reports.length - 1 ? "border-b border-gray-200" : ""}`}
-            >
-              <View className="flex-row gap-4">
-                <Image
-                  source={{ uri: report.image }}
-                  className="w-20 h-20 rounded-lg"
-                  resizeMode="cover"
-                />
-                <View className="flex-1">
-                  <View className="flex-row items-start justify-between mb-1">
-                    <View className="flex-1">
-                      <Text className="font-semibold text-gray-900">{report.title}</Text>
-                      <Text className="text-xs text-gray-500">
-                        {report.location} • {report.time}
-                      </Text>
-                    </View>
-                    <View className={`px-2 py-1 ${report.statusColor} rounded-full ml-2`}>
-                      <Text className={`text-xs font-medium ${report.statusTextColor}`}>
-                        {report.status}
-                      </Text>
-                    </View>
-                  </View>
-                  <Text className="text-sm text-gray-600 mb-2">{report.description}</Text>
-                  <TouchableOpacity
-                    onPress={() => setChatModalVisible(true)}
-                    className="flex-row items-center gap-1"
-                  >
-                    <Ionicons name="chatbubble-outline" size={16} color="#E63946" />
-                    <Text className="text-sm text-[#E63946] font-medium">
-                      View Messages ({report.messages})
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
+        <View className="bg-white px-4 py-3 flex-row items-center justify-between border-b border-gray-100" style={{ marginTop: insets.top }}>
+          <View className="flex-row items-center gap-2">
+            <View className="w-10 h-10 bg-[#E63946] rounded-lg items-center justify-center">
+              <Text className="text-white text-xl font-bold">E</Text>
             </View>
-          ))}
+            <Text className="text-xl font-bold text-gray-900">EyeSOS</Text>
+          </View>
+          <TouchableOpacity className="w-10 h-10 bg-gray-100 rounded-full items-center justify-center">
+            <Ionicons name="notifications-outline" size={24} color="#4B5563" />
+          </TouchableOpacity>
         </View>
 
-        <View className="bg-white mx-4 mb-6 rounded-lg shadow-sm">
-          <View className="p-4 border-b border-gray-200">
-            <Text className="text-lg font-bold text-gray-900">Emergency Contacts</Text>
+        <ScrollView className="flex-1">
+          <View className="bg-[#E63946] mx-4 mt-6 mb-6 p-6 rounded-lg">
+            <Text className="text-2xl font-bold text-white mb-2">Report an Incident</Text>
+            <Text className="text-white opacity-90">
+              See a disaster or emergency? Take a photo and send it directly to MDRRMC for immediate response.
+            </Text>
           </View>
-          <View className="p-4 gap-3">
-            <TouchableOpacity className="flex-row items-center justify-between p-3 bg-red-50 rounded-lg active:bg-red-100">
-              <View className="flex-row items-center gap-3">
-                <View className="w-10 h-10 bg-[#E63946] rounded-full items-center justify-center">
-                  <Ionicons name="call" size={20} color="white" />
-                </View>
-                <View>
-                  <Text className="font-semibold text-gray-900">Emergency Hotline</Text>
-                  <Text className="text-sm text-gray-600">911</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
 
-            <TouchableOpacity className="flex-row items-center justify-between p-3 bg-blue-50 rounded-lg active:bg-blue-100">
-              <View className="flex-row items-center gap-3">
-                <View className="w-10 h-10 bg-blue-600 rounded-full items-center justify-center">
-                  <Ionicons name="call" size={20} color="white" />
-                </View>
-                <View>
-                  <Text className="font-semibold text-gray-900">MDRRMC Office</Text>
-                  <Text className="text-sm text-gray-600">143</Text>
-                </View>
-              </View>
+          <View className="mx-4 mb-4">
+            <TouchableOpacity
+              onPress={() => setReportModalVisible(true)}
+              className="bg-[#E63946] active:bg-[#D32F2F] py-4 rounded-lg flex-row items-center justify-center gap-2 shadow-lg"
+            >
+              <Ionicons name="camera" size={24} color="white" />
+              <Text className="text-white font-semibold text-base">Report Incident Now</Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </ScrollView>
 
-      <ReportIncidentModal
-        onClose={() => setReportModalVisible(false)}
-        visible={reportModalVisible}
-        onRoute={() => router.push('/(root)/camera')}
-        location={userCurrentLocation}
-        onSubmit={handleSubmitReport}
-        isLoading={isLoading}
-      />
+          <View className="mx-4 mb-6">
+            <TouchableOpacity
+              onPress={() => router.push('/(root)/alert')}
+              className="bg-white border-2 border-[#E63946] py-4 rounded-lg flex-row items-center justify-center gap-2 shadow-sm active:bg-red-50"
+            >
+              <Ionicons name="alert-circle" size={24} color="#E63946" />
+              <Text className="text-[#E63946] font-semibold text-base">Send Emergency Alert</Text>
+            </TouchableOpacity>
+          </View>
 
-      <ChatModal
-        onClose={() => setChatModalVisible(false)}
-        visible={chatModalVisible}
-      />
+          <ReportsCard
+            formatSmartDate={formatSmartDate}
+            accidentsReports={accidentsReports}
+            onReportPress={handleReportPress}
+          />
 
-    </View>
+          <View className="bg-white mx-4 mb-6 rounded-lg shadow-sm">
+            <View className="p-4 border-b border-gray-200">
+              <Text className="text-lg font-bold text-gray-900">Emergency Contacts</Text>
+            </View>
+            <View className="p-4 gap-3">
+              <TouchableOpacity className="flex-row items-center justify-between p-3 bg-red-50 rounded-lg active:bg-red-100">
+                <View className="flex-row items-center gap-3">
+                  <View className="w-10 h-10 bg-[#E63946] rounded-full items-center justify-center">
+                    <Ionicons name="call" size={20} color="white" />
+                  </View>
+                  <View>
+                    <Text className="font-semibold text-gray-900">Emergency Hotline</Text>
+                    <Text className="text-sm text-gray-600">911</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity className="flex-row items-center justify-between p-3 bg-blue-50 rounded-lg active:bg-blue-100">
+                <View className="flex-row items-center gap-3">
+                  <View className="w-10 h-10 bg-blue-600 rounded-full items-center justify-center">
+                    <Ionicons name="call" size={20} color="white" />
+                  </View>
+                  <View>
+                    <Text className="font-semibold text-gray-900">MDRRMC Office</Text>
+                    <Text className="text-sm text-gray-600">143</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+
+        <ReportIncidentModal
+          onClose={() => setReportModalVisible(false)}
+          visible={reportModalVisible}
+          onRoute={() => router.push('/(root)/camera')}
+          location={userCurrentLocation}
+          onSubmit={handleSubmitReport}
+          isLoading={isLoading}
+        />
+
+        <ChatModal
+          onClose={() => setChatModalVisible(false)}
+          visible={chatModalVisible}
+        />
+
+
+        <ReportViewDetails
+          report={selectedReport}
+          isVisible={isModalVisible}
+          onClose={handleCloseModal}
+          formatSmartDate={formatSmartDate}
+        />
+
+        {isInitialLoading && <OverlayLoading />}
+      </View>
+    </GestureHandlerRootView>
   );
 }
