@@ -12,11 +12,12 @@ interface ReportIncidentModalProps {
   location: {
     latitude: number;
     longitude: number;
-    address: string;
+    full_address: string;
   }
+  isLoading?: boolean
 }
 
-export type SeverityLevel = 'low' | 'moderate' | 'high' | 'critical';
+export type SeverityLevel = 'minor' | 'moderate' | 'high' | 'critical';
 
 export interface ReportData {
   photoUri: string | null;
@@ -25,22 +26,22 @@ export interface ReportData {
   location: {
     latitude: number;
     longitude: number;
-    address: string;
+    full_address: string;
   };
 }
 
 const severityOptions = [
-  { value: 'low' as SeverityLevel, label: 'Low', color: '#10B981', icon: 'information-circle' },
+  { value: 'minor' as SeverityLevel, label: 'Minor', color: '#10B981', icon: 'information-circle' },
   { value: 'moderate' as SeverityLevel, label: 'Moderate', color: '#F59E0B', icon: 'warning' },
   { value: 'high' as SeverityLevel, label: 'High', color: '#EF4444', icon: 'alert-circle' },
   { value: 'critical' as SeverityLevel, label: 'Critical', color: '#DC2626', icon: 'skull' },
 ];
 
-export default function ReportIncidentModal({ onClose, visible, onRoute, onSubmit, location }: ReportIncidentModalProps) {
+export default function ReportIncidentModal({ onClose, visible, onRoute, onSubmit, location, isLoading }: ReportIncidentModalProps) {
   const dispatch = useAppDispatch()
   const { photoUri } = useAppSelector((state) => state.photo)
   const [description, setDescription] = useState('');
-  const [severity, setSeverity] = useState<SeverityLevel>('low');
+  const [severity, setSeverity] = useState<SeverityLevel>('minor');
   const [showSeverityDropdown, setShowSeverityDropdown] = useState(false);
 
   const handleSubmit = () => {
@@ -52,7 +53,7 @@ export default function ReportIncidentModal({ onClose, visible, onRoute, onSubmi
     };
     onSubmit(reportData);
     setDescription('');
-    setSeverity('low');
+    setSeverity('minor');
   };
 
   const selectedSeverity = severityOptions.find(opt => opt.value === severity);
@@ -98,7 +99,6 @@ export default function ReportIncidentModal({ onClose, visible, onRoute, onSubmi
                     </TouchableOpacity>
                   </View>
                 ) : (
-                  // Show upload button
                   <TouchableOpacity
                     style={{ padding: 18 }}
                     onPress={onRoute}
@@ -160,7 +160,7 @@ export default function ReportIncidentModal({ onClose, visible, onRoute, onSubmi
                 )}
 
                 <Text className="text-xs text-gray-500 mt-2">
-                  {severity === 'low' && 'Minor issue, no immediate danger'}
+                  {severity === 'minor' && 'Minor issue, no immediate danger'}
                   {severity === 'moderate' && 'Requires attention, potential risk'}
                   {severity === 'high' && 'Serious situation, urgent response needed'}
                   {severity === 'critical' && 'Life-threatening emergency, immediate action required'}
@@ -171,10 +171,10 @@ export default function ReportIncidentModal({ onClose, visible, onRoute, onSubmi
                 <Text className="text-sm font-medium text-gray-700 mb-2">Location</Text>
                 <View className="flex-row gap-2">
                   <View className="flex-1 px-4 py-3 border border-gray-300 rounded-lg">
-                    <Text className="text-gray-500">{location.address}</Text>
+                    <Text className="text-gray-500">{location.full_address}</Text>
                   </View>
-                  <TouchableOpacity className="px-4 py-3 bg-gray-100 active:bg-gray-200 rounded-lg">
-                    <Ionicons name="location" size={20} color="#4B5563" />
+                  <TouchableOpacity className="px-4 py-3 justify-center  bg-gray-100 active:bg-gray-200 rounded-lg">
+                    <Ionicons className='items-center' name="location" size={24} color="#4B5563" />
                   </TouchableOpacity>
                 </View>
                 <Text className="text-xs text-gray-500 mt-1">
@@ -198,6 +198,7 @@ export default function ReportIncidentModal({ onClose, visible, onRoute, onSubmi
               <TouchableOpacity
                 className="bg-[#E63946] active:bg-[#D32F2F] py-3 rounded-lg items-center"
                 onPress={handleSubmit}
+                disabled={isLoading}
               >
                 <Text className="text-white font-semibold">Submit Report</Text>
               </TouchableOpacity>
