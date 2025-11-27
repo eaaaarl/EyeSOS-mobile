@@ -134,6 +134,12 @@ export default function Index() {
     }
   }
 
+  // Loading First load
+  const isInitialLoading =
+    UserProfileLoading ||
+    accidentsReportsLoading ||
+    isLoadingLocation;
+
   return (
     <View className="flex-1 bg-gray-50">
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
@@ -229,7 +235,7 @@ export default function Index() {
         visible={chatModalVisible}
       />
 
-      {UserProfileLoading || isLoadingLocation || accidentsReportsLoading && <OverlayLoading />}
+      {isInitialLoading && <OverlayLoading />}
     </View>
   );
 }
