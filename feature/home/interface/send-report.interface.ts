@@ -1,5 +1,4 @@
 export interface SendReportPayload {
-  report_number: string;
   severity: "minor" | "moderate" | "high" | "critical";
   reported_by: string;
   reporter_name: string;

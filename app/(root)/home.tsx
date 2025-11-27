@@ -103,17 +103,15 @@ export default function Index() {
     }
   }, [user, getCurrentLocation]);
 
-  const [sendReport, { isloading }] = useSendReportMutation()
+  const [sendReport, { isLoading }] = useSendReportMutation()
 
   const handleSubmitReport = async (data: ReportData) => {
     try {
       if (UserProfile) {
-        console.log(data)
         const res = await sendReport({
           imageUrl: data.photoUri ?? '',
           latitude: data.location.latitude,
           longitude: data.location.longitude,
-          report_number: 'ID-123123',
           reported_by: UserProfile?.profile.id,
           reporter_contact: UserProfile?.profile.mobileNo,
           reporter_name: UserProfile.profile.name,
@@ -264,7 +262,7 @@ export default function Index() {
         onRoute={() => router.push('/(root)/camera')}
         location={userCurrentLocation}
         onSubmit={handleSubmitReport}
-        isLoading={isloading}
+        isLoading={isLoading}
       />
 
       <ChatModal
