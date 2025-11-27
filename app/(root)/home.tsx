@@ -1,3 +1,6 @@
+import { reports } from "@/constant/mock-data";
+import { useGetProfilesQuery } from "@/feature/auth/api/authApi";
+import { useSendReportMutation } from "@/feature/home/api/homeApi";
 import ChatModal from "@/feature/home/components/ChatModal";
 import ReportIncidentModal, { ReportData } from "@/feature/home/components/ReportIncidentModal";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
@@ -21,7 +24,13 @@ export default function Index() {
   const [userCurrentLocation, setUserCurrentLocation] = useState({
     latitude: 0,
     longitude: 0,
-    address: ''
+    full_address: '',
+    address: [] as unknown
+  })
+
+  // Get Profiles Users RTK QUERY 
+  const { data: UserProfile } = useGetProfilesQuery({
+    id: user.id
   })
 
   const requestLocationPermission = async () => {
@@ -62,11 +71,20 @@ export default function Index() {
         longitude: location.coords.longitude,
       });
 
+      /* console.log('address', address)
+      console.log('location', location) */
+
+      const rawAddress = address[0]?.formattedAddress || 'Unknown location';
+
+      const parts = rawAddress.split(',').slice(1);
+      const cleanedAddress = parts.join(',').trim();
+
       setUserCurrentLocation({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
-        address: address[0]?.street || address[0]?.city || address[0]?.name || 'Unknown location'
-      })
+        full_address: cleanedAddress,
+        address: address[0]
+      });
 
     } catch (error) {
       console.log('Location error:', error);
@@ -85,14 +103,28 @@ export default function Index() {
     }
   }, [user, getCurrentLocation]);
 
+  const [sendReport, { isLoading }] = useSendReportMutation()
 
   const handleSubmitReport = async (data: ReportData) => {
     try {
-      console.log('Report Data:', data);
-      alert('Report submitted successfully!');
+      if (UserProfile) {
+        const res = await sendReport({
+          imageUrl: data.photoUri ?? '',
+          latitude: data.location.latitude,
+          longitude: data.location.longitude,
+          reported_by: UserProfile?.profile.id,
+          reporter_contact: UserProfile?.profile.mobileNo,
+          reporter_name: UserProfile.profile.name,
+          severity: data.severity,
+          reporter_notes: data.description,
+          location_address: data.location.full_address
+        }).unwrap()
 
-      setReportModalVisible(false);
-      dispatch(clearPhotoUri())
+        console.log('res', res)
+        alert('Send report success')
+        setReportModalVisible(false);
+        dispatch(clearPhotoUri())
+      }
     } catch (error) {
       console.error('Error submitting report:', error);
       alert('Failed to submit report');
@@ -100,44 +132,6 @@ export default function Index() {
   }
 
 
-  const reports = [
-    {
-      id: 1,
-      title: "Street Flooding",
-      location: "Lianga, Surigao Del Sur",
-      time: "2 hours ago",
-      status: "Under Review",
-      statusColor: "bg-yellow-100",
-      statusTextColor: "text-yellow-800",
-      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQUGPe6qvJr0369R1iFkaGhDx6LDEa1bjrAuA&s",
-      description: "Water level reaching knee height at Commonwealth Ave.",
-      messages: 2,
-    },
-    {
-      id: 2,
-      title: "House Fire",
-      location: "Lianga, Surigao Del Sur",
-      time: "5 hours ago",
-      status: "Resolved",
-      statusColor: "bg-green-100",
-      statusTextColor: "text-green-800",
-      image: "https://cdn.sanity.io/images/ycvw0l8e/production/b60207faf3c300ab95d4d67eccc3175c1e74da9d-4800x2700.jpg",
-      description: "Fire at residential area, smoke visible from street.",
-      messages: 8,
-    },
-    {
-      id: 3,
-      title: "Road Blockage",
-      location: "Lianga, Surigao Del Sur",
-      time: "1 day ago",
-      status: "In Progress",
-      statusColor: "bg-blue-100",
-      statusTextColor: "text-blue-800",
-      image: "https://media.philstar.com/images/articles/gen11-otis-bridge-eddgumban2018-06-2722-44-58_2018-09-05_12-40-12.jpg",
-      description: "Fallen tree blocking the main road after heavy rain.",
-      messages: 5,
-    },
-  ];
 
   return (
     <View className="flex-1 bg-gray-50">
@@ -268,12 +262,14 @@ export default function Index() {
         onRoute={() => router.push('/(root)/camera')}
         location={userCurrentLocation}
         onSubmit={handleSubmitReport}
+        isLoading={isLoading}
       />
 
       <ChatModal
         onClose={() => setChatModalVisible(false)}
         visible={chatModalVisible}
       />
+
     </View>
   );
 }
