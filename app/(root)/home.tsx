@@ -83,8 +83,6 @@ export default function Index() {
         longitude: location.coords.longitude,
       });
 
-      /* console.log('address', address)
-      console.log('location', location) */
 
       const rawAddress = address[0]?.formattedAddress || 'Unknown location';
 
