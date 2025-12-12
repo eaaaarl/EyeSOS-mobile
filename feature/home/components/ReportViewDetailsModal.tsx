@@ -6,7 +6,6 @@ import { Report } from '../interface/get-reports.interface';
 
 interface ReportViewDetailsProps {
   report: Report | null;
-  isVisible: boolean;
   onClose: () => void;
   formatSmartDate: (date: string) => string;
 }
@@ -53,7 +52,6 @@ const getSeverityConfig = (severity: Report["severity"]) => {
 
 export default function ReportViewDetails({
   report,
-  isVisible,
   onClose,
   formatSmartDate
 }: ReportViewDetailsProps) {
@@ -71,7 +69,6 @@ export default function ReportViewDetails({
       snapPoints={snapPoints || ["40%", "90%"]}
       enablePanDownToClose
       onClose={onClose}
-      backgroundStyle={{ backgroundColor: '#f9fafb' }}
       handleIndicatorStyle={{ backgroundColor: '#9ca3af', width: 40, height: 4 }}
     >
       <BottomSheetScrollView className="flex-1" style={{ backgroundColor: '#f9fafb' }}>

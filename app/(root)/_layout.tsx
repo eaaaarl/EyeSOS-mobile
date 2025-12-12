@@ -47,6 +47,13 @@ export default function RootLayout() {
           tabBarStyle: { display: 'none' }
         }}
       />
+      {/* <Tabs.Screen
+        name='message'
+        options={{
+          href: null,
+          tabBarStyle: { display: 'none' }
+        }}
+      /> */}
     </Tabs>
   )
 }

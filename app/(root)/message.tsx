@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StatusBar, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function Messages() {
   const insets = useSafeAreaInsets()
+  const router = useRouter()
   const [message, setMessage] = useState('');
 
   const messages = [
@@ -63,9 +65,11 @@ export default function Messages() {
     <View className="flex-1 bg-gray-50">
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-      {/* Header */}
       <View className="bg-white px-4 py-3 border-b border-gray-100" style={{ marginTop: insets.top }}>
         <View className="flex-row items-center gap-3">
+          <TouchableOpacity className="w-10 h-10 rounded-full items-center justify-center bg-gray-100" onPress={router.back}>
+            <Ionicons name="chevron-back" size={22} color="#111827" />
+          </TouchableOpacity>
           <View className="w-12 h-12 bg-blue-600 rounded-full items-center justify-center">
             <Ionicons name="shield-checkmark" size={24} color="white" />
           </View>
@@ -82,7 +86,6 @@ export default function Messages() {
         </View>
       </View>
 
-      {/* Messages */}
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"

@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { useState } from "react";
+import { ActivityIndicator, Image, Text, TouchableOpacity, View } from "react-native";
 import { Report } from "../interface/get-reports.interface";
 
 interface ReportsProps {
@@ -46,6 +47,49 @@ const getSeverityConfig = (severity: Report["severity"]) => {
   return configs[severity];
 };
 
+const ImageWithSkeleton = ({ uri, count }: { uri: string; count: number }) => {
+  const [isLoading, setIsLoading] = useState(true);
+
+  return (
+    <View className="relative">
+      {isLoading && (
+        <View
+          className="absolute inset-0 bg-gray-200 rounded-lg items-center justify-center"
+          style={{ width: 96, height: 96 }}
+        >
+          <ActivityIndicator size="small" color="#9ca3af" />
+        </View>
+      )}
+      <Image
+        source={{ uri }}
+        className="rounded-lg"
+        style={{ width: 96, height: 96 }}
+        resizeMode="cover"
+        onLoadStart={() => setIsLoading(true)}
+        onLoadEnd={() => setIsLoading(false)}
+      />
+      {count > 1 && (
+        <View
+          className="absolute rounded-full flex-row items-center"
+          style={{
+            bottom: 8,
+            right: 8,
+            paddingHorizontal: 8,
+            paddingVertical: 2,
+            gap: 4,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)'
+          }}
+        >
+          <Ionicons name="images" size={10} color="white" />
+          <Text className="text-white text-xs font-semibold">
+            {count}
+          </Text>
+        </View>
+      )}
+    </View>
+  );
+};
+
 export default function ReportsCard({
   accidentsReports,
   formatSmartDate,
@@ -71,7 +115,6 @@ export default function ReportsCard({
 
   return (
     <View className="bg-white rounded-xl shadow-sm overflow-hidden" style={{ marginHorizontal: 16, marginBottom: 24 }}>
-      {/* Header */}
       <View className="bg-gray-50 border-b border-gray-100 flex-row items-center justify-between" style={{ paddingHorizontal: 16, paddingVertical: 14 }}>
         <View className="flex-row items-center" style={{ gap: 8 }}>
           <View className="bg-red-50 rounded-lg items-center justify-center" style={{ width: 32, height: 32 }}>
@@ -86,7 +129,6 @@ export default function ReportsCard({
         </View>
       </View>
 
-      {/* Reports List */}
       {reports.map((report, index) => {
         const severityConfig = getSeverityConfig(report.severity);
         return (
@@ -98,32 +140,10 @@ export default function ReportsCard({
             style={{ padding: 16 }}
           >
             <View className="flex-row" style={{ gap: 14 }}>
-              <View className="relative">
-                <Image
-                  source={{ uri: report.imageUrl[0] }}
-                  className="rounded-lg"
-                  style={{ width: 96, height: 96 }}
-                  resizeMode="cover"
-                />
-                {report.imageUrl.length > 1 && (
-                  <View
-                    className="absolute rounded-full flex-row items-center"
-                    style={{
-                      bottom: 8,
-                      right: 8,
-                      paddingHorizontal: 8,
-                      paddingVertical: 2,
-                      gap: 4,
-                      backgroundColor: 'rgba(0, 0, 0, 0.7)'
-                    }}
-                  >
-                    <Ionicons name="images" size={10} color="white" />
-                    <Text className="text-white text-xs font-semibold">
-                      {report.imageUrl.length}
-                    </Text>
-                  </View>
-                )}
-              </View>
+              <ImageWithSkeleton
+                uri={report.imageUrl[0]}
+                count={report.imageUrl.length}
+              />
 
               <View className="flex-1">
                 <View className="flex-row items-start justify-between" style={{ marginBottom: 8 }}>
