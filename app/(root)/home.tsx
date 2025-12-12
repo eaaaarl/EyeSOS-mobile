@@ -7,7 +7,8 @@ import ReportsCard from "@/feature/home/components/ReportsCard";
 import ReportViewDetails from "@/feature/home/components/ReportViewDetailsModal";
 import { Report } from "@/feature/home/interface/get-reports.interface";
 import { formatSmartDate } from "@/feature/home/utils/date";
-import { useAppSelector } from "@/lib/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import { clearPhotoUri } from "@/lib/redux/state/photoSlice";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from 'expo-location';
 import { router } from "expo-router";
@@ -17,6 +18,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Index() {
+  const dispatch = useAppDispatch()
   const user = useAppSelector((state) => state.auth)
   const insets = useSafeAreaInsets()
   const [reportModalVisible, setReportModalVisible] = useState(false);
@@ -130,6 +132,7 @@ export default function Index() {
           location_address: data.location.full_address
         }).unwrap()
         setReportModalVisible(false);
+        dispatch(clearPhotoUri())
       }
     } catch (error) {
       console.error('Error submitting report:', error);

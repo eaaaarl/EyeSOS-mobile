@@ -3,6 +3,7 @@ import { clearPhotoUri } from '@/lib/redux/state/photoSlice';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface ReportIncidentModalProps {
   visible: boolean;
@@ -38,6 +39,7 @@ const severityOptions = [
 ];
 
 export default function ReportIncidentModal({ onClose, visible, onRoute, onSubmit, location, isLoading }: ReportIncidentModalProps) {
+  const insets = useSafeAreaInsets()
   const dispatch = useAppDispatch()
   const { photoUri } = useAppSelector((state) => state.photo)
   const [description, setDescription] = useState('');
@@ -230,8 +232,9 @@ export default function ReportIncidentModal({ onClose, visible, onRoute, onSubmi
                   className="bg-[#E63946] active:bg-[#D32F2F] py-3 rounded-lg items-center"
                   onPress={handleSubmit}
                   disabled={isLoading}
+                  style={{ marginBottom: insets.bottom }}
                 >
-                  <Text className="text-white font-semibold">Submit Report</Text>
+                  <Text className="text-white font-semibold p-3 text-lg">Submit Report</Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>
