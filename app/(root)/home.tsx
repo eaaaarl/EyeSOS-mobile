@@ -139,14 +139,12 @@ export default function Index() {
     }
   }
 
-  // Modal handler for open the View Details reports
   const handleReportPress = (report: Report) => {
     setSelectedReport(report);
     setIsModalVisible(true);
   };
   const handleCloseModal = () => {
     setIsModalVisible(false);
-    // Optional: Clear selected report after animation completes
     setTimeout(() => setSelectedReport(null), 300);
   };
 
@@ -253,12 +251,10 @@ export default function Index() {
           visible={chatModalVisible}
         />
 
-
         <ReportViewDetails
           report={selectedReport}
-          isVisible={isModalVisible}
-          onClose={handleCloseModal}
           formatSmartDate={formatSmartDate}
+          onClose={handleCloseModal}
         />
 
         {isInitialLoading && <OverlayLoading />}

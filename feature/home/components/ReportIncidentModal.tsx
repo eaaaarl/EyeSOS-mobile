@@ -80,29 +80,53 @@ export default function ReportIncidentModal({ onClose, visible, onRoute, onSubmi
                 <Ionicons name="close" size={24} color="#4B5563" />
               </TouchableOpacity>
             </View>
-            <ScrollView className="p-4">
+            <ScrollView className="p-4" >
               <View className="gap-4">
                 <View>
                   <Text className="text-sm font-medium text-gray-700 mb-2">Upload Photo</Text>
                   {photoUri ? (
-                    <View className="relative">
+                    <View style={{ position: 'relative' }}>
                       <Image
                         source={{ uri: photoUri }}
-                        className="w-full h-48 rounded-lg"
+                        style={{ width: '100%', height: 192, borderRadius: 8 }}
                         resizeMode="cover"
                       />
+
+                      {/* Close button - top right */}
                       <TouchableOpacity
                         onPress={() => dispatch(clearPhotoUri())}
-                        className="absolute top-2 right-2 bg-black/60 rounded-full p-2"
+                        style={{
+                          position: 'absolute',
+                          top: 8,
+                          right: 8,
+                          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                          borderRadius: 9999,
+                          padding: 8,
+                        }}
                       >
                         <Ionicons name="close" size={20} color="white" />
                       </TouchableOpacity>
+
+                      {/* Retake button - top left */}
                       <TouchableOpacity
                         onPress={onRoute}
-                        className="absolute top-3 left-3 bg-[#E63946] rounded-full px-3 py-2 flex-row items-center gap-1"
+                        style={{
+                          position: 'absolute',
+                          top: 8,
+                          left: 8,
+                          backgroundColor: '#E63946',
+                          borderRadius: 9999,
+                          paddingHorizontal: 12,
+                          paddingVertical: 8,
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 4,
+                        }}
                       >
                         <Ionicons name="camera" size={16} color="white" />
-                        <Text className="text-white text-xs font-semibold">Retake</Text>
+                        <Text style={{ color: 'white', fontSize: 12, fontWeight: '600' }}>
+                          Retake
+                        </Text>
                       </TouchableOpacity>
                     </View>
                   ) : (
@@ -192,7 +216,7 @@ export default function ReportIncidentModal({ onClose, visible, onRoute, onSubmi
                 <View>
                   <Text className="text-sm font-medium text-gray-700 mb-2">Description</Text>
                   <TextInput
-                    className="px-4 py-3 border border-gray-300 rounded-lg min-h-[100px]"
+                    className="px-4 py-3 mb-4 border border-gray-300 rounded-lg min-h-[100px]"
                     placeholder="Describe what you see..."
                     placeholderTextColor="#9CA3AF"
                     multiline

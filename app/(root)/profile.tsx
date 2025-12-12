@@ -200,7 +200,7 @@ export default function Profile() {
               <View className="w-10 h-10 bg-teal-100 rounded-full items-center justify-center">
                 <Ionicons name="information-circle-outline" size={20} color="#14B8A6" />
               </View>
-              <Text className="text-base text-gray-900 font-normal">About DisasterEye</Text>
+              <Text className="text-base text-gray-900 font-normal">About EyeSOS</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
           </TouchableOpacity>
