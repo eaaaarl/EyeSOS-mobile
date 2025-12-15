@@ -1,12 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { ActivityIndicator, Image, Text, TouchableOpacity, View } from "react-native";
-import { Report } from "../interface/get-reports.interface";
+import { Report, ReportsResponse } from "../interface/get-reports.interface";
 
 interface ReportsProps {
-  accidentsReports?: { reports: Report[] };
+  accidentsReports?: ReportsResponse;
   formatSmartDate: (date: string) => string;
   onReportPress?: (report: Report) => void;
+  onNextPage?: () => void;
+  onPrevPage?: () => void;
+  isPaginating?: boolean;
 }
 
 const getSeverityConfig = (severity: Report["severity"]) => {
@@ -93,9 +96,19 @@ const ImageWithSkeleton = ({ uri, count }: { uri: string; count: number }) => {
 export default function ReportsCard({
   accidentsReports,
   formatSmartDate,
-  onReportPress
+  onReportPress,
+  onNextPage,
+  onPrevPage,
+  isPaginating
 }: ReportsProps) {
   const reports = accidentsReports?.reports || [];
+  const pagination = accidentsReports?.meta.pagination;
+  const page = pagination?.page ?? 1;
+  const totalPages = pagination?.totalPages ?? 1;
+  const totalCount = pagination?.totalCount ?? reports.length;
+  const hasNext = pagination?.hasNext ?? false;
+  const hasPrevious = pagination?.hasPrevious ?? false;
+  const showPaginationControls = totalPages > 1;
 
   if (reports.length === 0) {
     return (
@@ -124,7 +137,7 @@ export default function ReportsCard({
         </View>
         <View className="bg-gray-100 rounded-full" style={{ paddingHorizontal: 12, paddingVertical: 6 }}>
           <Text className="text-xs text-gray-700 font-bold">
-            {reports.length} {reports.length === 1 ? 'report' : 'reports'}
+            {totalCount} {totalCount === 1 ? 'report' : 'reports'}
           </Text>
         </View>
       </View>
@@ -206,6 +219,39 @@ export default function ReportsCard({
           </TouchableOpacity>
         );
       })}
+
+      {showPaginationControls && (
+        <View className="border-t border-gray-100 flex-row items-center justify-between px-4 py-3">
+          <TouchableOpacity
+            onPress={onPrevPage}
+            disabled={!hasPrevious || isPaginating}
+            className={`flex-row items-center px-3 py-2 rounded-full ${(!hasPrevious || isPaginating) ? "opacity-50" : ""}`}
+            style={{ gap: 8 }}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="chevron-back" size={16} color="#1f2937" />
+            <Text className="text-sm font-semibold text-gray-700">Previous</Text>
+          </TouchableOpacity>
+
+          <View className="flex-row items-center" style={{ gap: 8 }}>
+            {isPaginating && <ActivityIndicator size="small" color="#9ca3af" />}
+            <Text className="text-xs text-gray-500 font-semibold">
+              Page {page} of {Math.max(totalPages, 1)}
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            onPress={onNextPage}
+            disabled={!hasNext || isPaginating}
+            className={`flex-row items-center px-3 py-2 rounded-full ${(!hasNext || isPaginating) ? "opacity-50" : ""}`}
+            style={{ gap: 8 }}
+            activeOpacity={0.7}
+          >
+            <Text className="text-sm font-semibold text-gray-700">Next</Text>
+            <Ionicons name="chevron-forward" size={16} color="#1f2937" />
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }

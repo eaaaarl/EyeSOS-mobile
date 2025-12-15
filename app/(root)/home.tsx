@@ -21,12 +21,13 @@ export default function Index() {
   const dispatch = useAppDispatch()
   const user = useAppSelector((state) => state.auth)
   const insets = useSafeAreaInsets()
+  const REPORTS_LIMIT = 5;
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [chatModalVisible, setChatModalVisible] = useState(false);
-  const [hasPermission, setHasPermission] = useState(false);
+  const [, setHasPermission] = useState(false);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [page, setPage] = useState(1);
 
   const [userCurrentLocation, setUserCurrentLocation] = useState({
     latitude: 0,
@@ -41,11 +42,16 @@ export default function Index() {
   })
 
   // Get Reports Accidents by User Id
-  const { data: accidentsReports, isLoading: accidentsReportsLoading } = useGetReportsQuery({
-    userId: user.id
+  const {
+    data: accidentsReports,
+    isLoading: accidentsReportsLoading,
+    isFetching: accidentsReportsFetching
+  } = useGetReportsQuery({
+    userId: user.id,
+    page,
+    limit: REPORTS_LIMIT
   })
 
-  console.log(JSON.stringify(accidentsReports, null, 2))
 
   const requestLocationPermission = async () => {
     try {
@@ -112,6 +118,7 @@ export default function Index() {
   useEffect(() => {
     if (user) {
       getCurrentLocation();
+      setPage(1);
     }
   }, [user, getCurrentLocation]);
 
@@ -142,18 +149,28 @@ export default function Index() {
 
   const handleReportPress = (report: Report) => {
     setSelectedReport(report);
-    setIsModalVisible(true);
   };
   const handleCloseModal = () => {
-    setIsModalVisible(false);
     setTimeout(() => setSelectedReport(null), 300);
+  };
+
+  const handleNextReportsPage = () => {
+    if (accidentsReports?.meta.pagination.hasNext) {
+      setPage((prev) => prev + 1);
+    }
+  };
+
+  const handlePrevReportsPage = () => {
+    if (accidentsReports?.meta.pagination.hasPrevious) {
+      setPage((prev) => Math.max(1, prev - 1));
+    }
   };
 
   // Loading First load
   const isInitialLoading =
-    UserProfileLoading ||
-    accidentsReportsLoading ||
-    isLoadingLocation;
+    (UserProfileLoading ||
+      accidentsReportsLoading ||
+      isLoadingLocation);
 
   return (
     <GestureHandlerRootView className='flex-1 bg-white'>
@@ -204,6 +221,9 @@ export default function Index() {
             formatSmartDate={formatSmartDate}
             accidentsReports={accidentsReports}
             onReportPress={handleReportPress}
+            onNextPage={handleNextReportsPage}
+            onPrevPage={handlePrevReportsPage}
+            isPaginating={accidentsReportsFetching}
           />
 
           <View className="bg-white mx-4 mb-6 rounded-lg shadow-sm">
