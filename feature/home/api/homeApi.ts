@@ -67,13 +67,19 @@ export const homeApi = createApi({
       invalidatesTags: ["getReports"],
     }),
 
-    getReports: builder.query<ReportsResponse, { userId: string }>({
-      queryFn: async ({ userId }) => {
-        const { data, error } = await supabase
+    getReports: builder.query<
+      ReportsResponse,
+      { userId: string; page?: number; limit?: number }
+    >({
+      queryFn: async ({ userId, page = 1, limit = 5 }) => {
+        const offset = (page - 1) * limit;
+
+        const { data, error, count } = await supabase
           .from("accidents")
-          .select("*")
+          .select("*", { count: "exact" })
           .eq("reported_by", userId)
-          .order("created_at", { ascending: false });
+          .order("created_at", { ascending: false })
+          .range(offset, offset + limit - 1);
 
         if (error) {
           return {
@@ -83,13 +89,26 @@ export const homeApi = createApi({
           };
         }
 
+        const totalCount = count ?? 0;
+        const totalPages = totalCount > 0 ? Math.ceil(totalCount / limit) : 1;
+        const hasNext = page * limit < totalCount;
+        const hasPrevious = page > 1;
+
         return {
           data: {
             reports: data,
             meta: {
               success: true,
               message: "Reports Fetched",
-            },
+              pagination: {
+                page,
+                limit,
+                totalCount,
+                totalPages,
+                hasNext,
+                hasPrevious,
+              },
+              },
           },
         };
       },

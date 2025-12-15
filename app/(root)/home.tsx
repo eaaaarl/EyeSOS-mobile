@@ -7,7 +7,8 @@ import ReportsCard from "@/feature/home/components/ReportsCard";
 import ReportViewDetails from "@/feature/home/components/ReportViewDetailsModal";
 import { Report } from "@/feature/home/interface/get-reports.interface";
 import { formatSmartDate } from "@/feature/home/utils/date";
-import { useAppSelector } from "@/lib/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import { clearPhotoUri } from "@/lib/redux/state/photoSlice";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from 'expo-location';
 import { router } from "expo-router";
@@ -17,14 +18,16 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Index() {
+  const dispatch = useAppDispatch()
   const user = useAppSelector((state) => state.auth)
   const insets = useSafeAreaInsets()
+  const REPORTS_LIMIT = 5;
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [chatModalVisible, setChatModalVisible] = useState(false);
-  const [hasPermission, setHasPermission] = useState(false);
+  const [, setHasPermission] = useState(false);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [page, setPage] = useState(1);
 
   const [userCurrentLocation, setUserCurrentLocation] = useState({
     latitude: 0,
@@ -39,11 +42,16 @@ export default function Index() {
   })
 
   // Get Reports Accidents by User Id
-  const { data: accidentsReports, isLoading: accidentsReportsLoading } = useGetReportsQuery({
-    userId: user.id
+  const {
+    data: accidentsReports,
+    isLoading: accidentsReportsLoading,
+    isFetching: accidentsReportsFetching
+  } = useGetReportsQuery({
+    userId: user.id,
+    page,
+    limit: REPORTS_LIMIT
   })
 
-  console.log(JSON.stringify(accidentsReports, null, 2))
 
   const requestLocationPermission = async () => {
     try {
@@ -110,6 +118,7 @@ export default function Index() {
   useEffect(() => {
     if (user) {
       getCurrentLocation();
+      setPage(1);
     }
   }, [user, getCurrentLocation]);
 
@@ -130,6 +139,7 @@ export default function Index() {
           location_address: data.location.full_address
         }).unwrap()
         setReportModalVisible(false);
+        dispatch(clearPhotoUri())
       }
     } catch (error) {
       console.error('Error submitting report:', error);
@@ -139,18 +149,28 @@ export default function Index() {
 
   const handleReportPress = (report: Report) => {
     setSelectedReport(report);
-    setIsModalVisible(true);
   };
   const handleCloseModal = () => {
-    setIsModalVisible(false);
     setTimeout(() => setSelectedReport(null), 300);
+  };
+
+  const handleNextReportsPage = () => {
+    if (accidentsReports?.meta.pagination.hasNext) {
+      setPage((prev) => prev + 1);
+    }
+  };
+
+  const handlePrevReportsPage = () => {
+    if (accidentsReports?.meta.pagination.hasPrevious) {
+      setPage((prev) => Math.max(1, prev - 1));
+    }
   };
 
   // Loading First load
   const isInitialLoading =
-    UserProfileLoading ||
-    accidentsReportsLoading ||
-    isLoadingLocation;
+    (UserProfileLoading ||
+      accidentsReportsLoading ||
+      isLoadingLocation);
 
   return (
     <GestureHandlerRootView className='flex-1 bg-white'>
@@ -201,6 +221,9 @@ export default function Index() {
             formatSmartDate={formatSmartDate}
             accidentsReports={accidentsReports}
             onReportPress={handleReportPress}
+            onNextPage={handleNextReportsPage}
+            onPrevPage={handlePrevReportsPage}
+            isPaginating={accidentsReportsFetching}
           />
 
           <View className="bg-white mx-4 mb-6 rounded-lg shadow-sm">

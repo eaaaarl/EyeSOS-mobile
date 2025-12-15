@@ -18,10 +18,20 @@ export interface Report {
   imageUrl: string[];
 }
 
+export interface ReportsPaginationMeta {
+  page: number;
+  limit: number;
+  totalCount: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+}
+
 export interface ReportsResponse {
   reports: Report[];
   meta: {
     success: boolean;
     message: string;
+    pagination: ReportsPaginationMeta;
   };
 }

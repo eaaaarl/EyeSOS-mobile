@@ -11,11 +11,13 @@ import {
   Alert,
   Image,
   Modal,
-  ScrollView,
   Text,
   View
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+
 
 const SignIn = () => {
   const insets = useSafeAreaInsets();
@@ -76,7 +78,6 @@ const SignIn = () => {
       console.log('signin response:', res);
 
       if ('error' in res) {
-        // Handle error
         Alert.alert(
           "Sign In Failed",
           "Invalid email or password",
@@ -97,12 +98,8 @@ const SignIn = () => {
 
   return (
     <>
-      <ScrollView
-        style={{ flex: 1, backgroundColor: 'white' }}
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View className="flex-1 bg-white">
+      <KeyboardAwareScrollView className="flex-1">
+        <View className=" bg-white" style={{ flex: 1 }}>
           <View className="relative w-full h-[250px]">
             <Image source={image.logo} className="z-0 w-full h-[250px]" />
           </View>
@@ -170,9 +167,8 @@ const SignIn = () => {
             </View>
           </View>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
-      {/* Loading Overlay */}
       <Modal
         transparent
         visible={isLoading}

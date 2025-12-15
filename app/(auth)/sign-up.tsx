@@ -15,7 +15,32 @@ import {
   Text,
   View
 } from "react-native";
+import { KeyboardAwareScrollView, useKeyboardHandler } from "react-native-keyboard-controller";
+import { useSharedValue } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const PADDING_BOTTOM = 20;
+
+const useGradualAnimation = () => {
+  const height = useSharedValue(PADDING_BOTTOM);
+
+  useKeyboardHandler(
+    {
+      onMove: (e) => {
+        "worklet";
+        // set height to min 10
+        height.value = Math.max(e.height, PADDING_BOTTOM);
+      },
+      onEnd: (e) => {
+        "worklet";
+        height.value = e.height;
+      },
+    },
+    []
+  );
+  return { height };
+};
+
 
 const SignUp = () => {
   const insets = useSafeAreaInsets();
@@ -135,117 +160,120 @@ const SignUp = () => {
     }
   }, [form, signUp, validateForm]);
 
+
   return (
     <>
-      <ScrollView
-        style={{ flex: 1, backgroundColor: 'white' }}
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View className="flex-1 bg-white">
-          <View className="relative w-full h-[250px]">
-            <Image source={image.logo} className="z-0 w-full h-[250px]" />
-          </View>
-          <View className="p-5">
-            <Text className="text-2xl text-black font-semibold">
-              Create Your Account
-            </Text>
-
-            <InputField
-              label="Name"
-              placeholder="Enter full name"
-              icon={icons.person}
-              textContentType="name"
-              value={form.name}
-              onChangeText={(value) => {
-                setForm({ ...form, name: value });
-                if (errors.name) setErrors({ ...errors, name: "" });
-              }}
-            />
-            {errors.name ? (
-              <Text className="text-red-500 text-sm mt-1 ml-1">
-                {errors.name}
+      <KeyboardAwareScrollView className="flex-1">
+        <ScrollView
+          style={{ flex: 1, backgroundColor: 'white' }}
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View className="flex-1 bg-white">
+            <View className="relative w-full h-[250px]">
+              <Image source={image.logo} className="z-0 w-full h-[250px]" />
+            </View>
+            <View className="p-5">
+              <Text className="text-2xl text-black font-semibold">
+                Create Your Account
               </Text>
-            ) : null}
 
-            <InputField
-              label="Mobile No."
-              placeholder="Enter mobile no."
-              icon={icons.phone}
-              textContentType="telephoneNumber"
-              keyboardType="phone-pad"
-              value={form.phone}
-              onChangeText={(value) => {
-                setForm({ ...form, phone: value });
-                if (errors.phone) setErrors({ ...errors, phone: "" });
-              }}
-            />
-            {errors.phone ? (
-              <Text className="text-red-500 text-sm mt-1 ml-1">
-                {errors.phone}
-              </Text>
-            ) : null}
-
-            <InputField
-              label="Email"
-              placeholder="Enter email"
-              icon={icons.email}
-              textContentType="emailAddress"
-              value={form.email}
-              onChangeText={(value) => {
-                setForm({ ...form, email: value });
-                if (errors.email) setErrors({ ...errors, email: "" });
-              }}
-            />
-            {errors.email ? (
-              <Text className="text-red-500 text-sm mt-1 ml-1">
-                {errors.email}
-              </Text>
-            ) : null}
-
-            <InputField
-              label="Password"
-              placeholder="Enter password"
-              icon={icons.lock}
-              secureTextEntry={true}
-              textContentType="password"
-              value={form.password}
-              onChangeText={(value) => {
-                setForm({ ...form, password: value });
-                if (errors.password) setErrors({ ...errors, password: "" });
-              }}
-            />
-            {errors.password ? (
-              <Text className="text-red-500 text-sm mt-1 ml-1">
-                {errors.password}
-              </Text>
-            ) : null}
-
-            <CustomButton
-              title="Sign Up"
-              onPress={onSignUpPress}
-              className="mt-6"
-              disabled={isLoading}
-            />
-
-            <OAuth />
-
-            <View
-              className="flex-row justify-center items-center mt-10"
-              style={{ marginBottom: insets.bottom }}
-            >
-              <Text className="text-lg text-general-200">
-                Already have an account?{" "}
-              </Text>
-              <Link href="/(auth)/sign-in">
-                <Text className="text-lg text-primary-500 underline font-medium">
-                  Sign In
+              <InputField
+                label="Name"
+                placeholder="Enter full name"
+                icon={icons.person}
+                textContentType="name"
+                value={form.name}
+                onChangeText={(value) => {
+                  setForm({ ...form, name: value });
+                  if (errors.name) setErrors({ ...errors, name: "" });
+                }}
+              />
+              {errors.name ? (
+                <Text className="text-red-500 text-sm mt-1 ml-1">
+                  {errors.name}
                 </Text>
-              </Link>
+              ) : null}
+
+              <InputField
+                label="Mobile No."
+                placeholder="Enter mobile no."
+                icon={icons.phone}
+                textContentType="telephoneNumber"
+                keyboardType="phone-pad"
+                value={form.phone}
+                onChangeText={(value) => {
+                  setForm({ ...form, phone: value });
+                  if (errors.phone) setErrors({ ...errors, phone: "" });
+                }}
+              />
+              {errors.phone ? (
+                <Text className="text-red-500 text-sm mt-1 ml-1">
+                  {errors.phone}
+                </Text>
+              ) : null}
+
+              <InputField
+                label="Email"
+                placeholder="Enter email"
+                icon={icons.email}
+                textContentType="emailAddress"
+                value={form.email}
+                onChangeText={(value) => {
+                  setForm({ ...form, email: value });
+                  if (errors.email) setErrors({ ...errors, email: "" });
+                }}
+              />
+              {errors.email ? (
+                <Text className="text-red-500 text-sm mt-1 ml-1">
+                  {errors.email}
+                </Text>
+              ) : null}
+
+              <InputField
+                label="Password"
+                placeholder="Enter password"
+                icon={icons.lock}
+                secureTextEntry={true}
+                textContentType="password"
+                value={form.password}
+                onChangeText={(value) => {
+                  setForm({ ...form, password: value });
+                  if (errors.password) setErrors({ ...errors, password: "" });
+                }}
+              />
+              {errors.password ? (
+                <Text className="text-red-500 text-sm mt-1 ml-1">
+                  {errors.password}
+                </Text>
+              ) : null}
+
+              <CustomButton
+                title="Sign Up"
+                onPress={onSignUpPress}
+                className="mt-6"
+                disabled={isLoading}
+              />
+
+              <OAuth />
+
+              <View
+                className="flex-row justify-center items-center mt-10"
+                style={{ marginBottom: insets.bottom }}
+              >
+                <Text className="text-lg text-general-200">
+                  Already have an account?{" "}
+                </Text>
+                <Link href="/(auth)/sign-in">
+                  <Text className="text-lg text-primary-500 underline font-medium">
+                    Sign In
+                  </Text>
+                </Link>
+              </View>
             </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAwareScrollView>
 
       <Modal
         transparent
