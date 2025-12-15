@@ -2,7 +2,8 @@ import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks';
 import { clearPhotoUri } from '@/lib/redux/state/photoSlice';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, Modal, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface ReportIncidentModalProps {
@@ -82,7 +83,9 @@ export default function ReportIncidentModal({ onClose, visible, onRoute, onSubmi
                 <Ionicons name="close" size={24} color="#4B5563" />
               </TouchableOpacity>
             </View>
-            <ScrollView className="p-4" >
+            <KeyboardAwareScrollView
+              className="p-4"
+            >
               <View className="gap-4">
                 <View>
                   <Text className="text-sm font-medium text-gray-700 mb-2">Upload Photo</Text>
@@ -109,7 +112,6 @@ export default function ReportIncidentModal({ onClose, visible, onRoute, onSubmi
                         <Ionicons name="close" size={20} color="white" />
                       </TouchableOpacity>
 
-                      {/* Retake button - top left */}
                       <TouchableOpacity
                         onPress={onRoute}
                         style={{
@@ -234,10 +236,10 @@ export default function ReportIncidentModal({ onClose, visible, onRoute, onSubmi
                   disabled={isLoading}
                   style={{ marginBottom: insets.bottom }}
                 >
-                  <Text className="text-white font-semibold p-3 text-lg">Submit Report</Text>
+                  <Text className="text-white font-semibold p-2 text-lg">Submit Report</Text>
                 </TouchableOpacity>
               </View>
-            </ScrollView>
+            </KeyboardAwareScrollView>
           </View>
         </View>
       </Modal>
