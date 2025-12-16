@@ -132,20 +132,20 @@ export default function Index() {
           latitude: data.location.latitude,
           longitude: data.location.longitude,
           reported_by: UserProfile?.profile.id,
-          reporter_contact: UserProfile?.profile.mobileNo,
           reporter_name: UserProfile.profile.name,
           severity: data.severity,
           reporter_notes: data.description,
-          location_address: data.location.full_address
-        }).unwrap()
+          location_address: data.location.full_address,
+          reporter_contact: UserProfile?.profile.mobileNo
+        }).unwrap();
         setReportModalVisible(false);
-        dispatch(clearPhotoUri())
+        dispatch(clearPhotoUri());
       }
     } catch (error) {
-      console.error('Error submitting report:', error);
-      alert('Failed to submit report');
+      console.error("Error submitting report:", error);
+      alert("Failed to submit report");
     }
-  }
+  };
 
   const handleReportPress = (report: Report) => {
     setSelectedReport(report);

@@ -12,6 +12,8 @@ export const homeApi = createApi({
   endpoints: (builder) => ({
     sendReport: builder.mutation<any, SendReportPayload>({
       queryFn: async (payload) => {
+        console.log("payload", payload);
+
         const fileExtension = "jpg";
         const fileName = `${payload.reporter_name}-${Date.now()}.${fileExtension}`;
         const filePath = `incidents/${fileName}`;
@@ -53,6 +55,23 @@ export const homeApi = createApi({
             },
           };
         }
+
+        // Get accidents report number
+        /* const { data: reportNumberData, error: reportNumberError } =
+          await supabase
+            .from("accidents")
+            .select("report_number")
+            .eq("reported_by", payload.reported_by);
+
+        if (reportNumberError) {
+          return {
+            error: {
+              message: reportNumberError.message,
+            },
+          };
+        }
+
+        console.log("Report number:", reportNumberData); */
 
         return {
           data: {
@@ -108,7 +127,7 @@ export const homeApi = createApi({
                 hasNext,
                 hasPrevious,
               },
-              },
+            },
           },
         };
       },
