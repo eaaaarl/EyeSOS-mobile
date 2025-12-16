@@ -2,6 +2,7 @@ import { ActivityIndicator, Alert, Image, Modal, Platform, Text, View } from "re
 
 import CustomButton from "@/components/CustomButton";
 import { icons } from "@/constant/icon";
+import { supabase } from "@/lib/supabase";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useState } from "react";
 
@@ -36,6 +37,29 @@ export default function OAuth() {
       }
 
       console.log('Google Sign-In result:', JSON.stringify(result, null, 2));
+
+      if (!result.data?.idToken) {
+        throw new Error('No ID token received from Google');
+      }
+
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: 'google',
+        token: result.data.idToken,
+      });
+
+      if (error) {
+        throw new Error('Failed to sign in with Google');
+      }
+
+      console.log('Sign in with ID token response:', JSON.stringify(data, null, 2));
+
+      await supabase.from('profiles').insert({
+        id: data.user.id,
+        name: data.user.user_metadata.name,
+        email: data.user.email,
+        avatarUrl: data.user.user_metadata.picture,
+      }); 
+
     } catch (error) {
       console.error('Error in Google Sign-In:', error);
       Alert.alert('Error', 'Failed to sign in with Google. Please try again.');

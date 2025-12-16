@@ -7,6 +7,7 @@ import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Modal,
   ScrollView,
   StatusBar,
@@ -119,6 +120,7 @@ export default function Profile() {
   const handleCloseLocationModal = () => {
     setLocationModalVisible(false);
   };
+
   return (
     <View className="flex-1 bg-gray-50">
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
@@ -132,20 +134,26 @@ export default function Profile() {
 
       <ScrollView className="flex-1">
         <View className="bg-white px-4 py-6 items-center border-b border-gray-100 mt-2">
-          <View className="w-24 h-24 bg-blue-600 rounded-full items-center justify-center mb-3">
-            <Text className="text-white text-4xl font-bold">
-              {user?.profile?.name?.charAt(0) || 'U'}
-            </Text>
-          </View>
+          {user?.profile?.avatarUrl ? (
+            <Image source={{ uri: user?.profile?.avatarUrl }} className="w-24 h-24 rounded-full mb-3" resizeMode="cover" />
+          ) : (
+            <View className="w-24 h-24 bg-blue-600 rounded-full items-center justify-center mb-3">
+              <Text className="text-white text-4xl font-bold">
+                {user?.profile?.name?.charAt(0) || 'U'}
+              </Text>
+            </View>
+          )}
           <Text className="text-2xl font-bold text-gray-900">
             {user?.profile?.name || 'User'}
           </Text>
           <Text className="text-gray-600 font-normal mt-1">
             {user?.profile?.email || ''}
           </Text>
-          <Text className="text-sm text-gray-500 font-normal mt-1">
-            {user?.profile?.mobileNo || ''}
-          </Text>
+          {user?.profile?.mobileNo && user?.profile?.mobileNo !== '' && (
+            <Text className="text-sm text-gray-500 font-normal mt-1">
+              {user?.profile?.mobileNo}
+            </Text>
+          )}
 
           <TouchableOpacity className="mt-4 px-6 py-2 bg-[#E63946] rounded-lg active:bg-[#D32F2F]">
             <Text className="text-white font-semibold">Edit Profile</Text>
