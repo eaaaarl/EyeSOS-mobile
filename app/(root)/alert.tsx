@@ -1,9 +1,10 @@
 import { useGetProfilesQuery } from '@/feature/auth/api/authApi';
 import { useAppSelector } from '@/lib/redux/hooks';
 import { Ionicons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
-import { ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Modal, Alert as RNAlert, ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function Alert() {
@@ -18,6 +19,78 @@ export default function Alert() {
   const insets = useSafeAreaInsets()
   const [selectedEmergency, setSelectedEmergency] = useState('fire');
   const [alertSent, setAlertSent] = useState(false);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+
+  const [userLocation, setUserLocation] = useState<{
+    latitude: number;
+    longitude: number;
+    full_address: string;
+    address: any;
+  } | null>(null);
+
+  const requestLocationPermission = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      return status === 'granted';
+    } catch (error) {
+      console.log('Permission error:', error);
+      return false;
+    }
+  };
+
+  const getCurrentLocation = useCallback(async () => {
+    setIsLoadingLocation(true);
+    try {
+      const hasPermission = await requestLocationPermission();
+      if (!hasPermission) {
+        RNAlert.alert(
+          'Location Permission Required',
+          'Please enable location permissions to see your current location.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: () => Location.requestForegroundPermissionsAsync() }
+          ]
+        );
+        setIsLoadingLocation(false);
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+
+      const address = await Location.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+
+      const rawAddress = address[0]?.formattedAddress || 'Unknown location';
+      const parts = rawAddress.split(',').slice(1);
+      const cleanedAddress = parts.join(',').trim();
+
+      setUserLocation({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        full_address: cleanedAddress || rawAddress,
+        address: address[0]
+      });
+    } catch (error) {
+      console.log('Location error:', error);
+      RNAlert.alert(
+        'Location Error',
+        'Unable to get your current location. Please try again or check your location settings.'
+      );
+    } finally {
+      setIsLoadingLocation(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user?.id) {
+      getCurrentLocation();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id])
 
   const emergencyTypes = [
     { id: 'fire', label: 'Fire', icon: 'flame', color: '#DC2626' },
@@ -32,10 +105,8 @@ export default function Alert() {
         <StatusBar barStyle="light-content" backgroundColor="#E63946" />
 
         <View className="flex-1 items-center justify-center px-6" style={{ marginTop: insets.top }}>
-          {/* Success Icon */}
-          <View className="w-32 h-32 bg-white/20 rounded-full items-center justify-center mb-8 relative">
+          <View className="w-32 h-32 mt-8 bg-white/20 rounded-full items-center justify-center mb-8 relative">
             <Ionicons name="checkmark-circle" size={80} color="white" />
-            {/* Pulsing rings */}
             <View className="absolute w-40 h-40 bg-white rounded-full opacity-10 animate-pulse" />
             <View className="absolute w-48 h-48 bg-white rounded-full opacity-5 animate-pulse" />
           </View>
@@ -45,7 +116,6 @@ export default function Alert() {
             MDRRMC has received your emergency alert and location
           </Text>
 
-          {/* Details Sent */}
           <View className="bg-white/10 rounded-2xl p-6 mb-8 w-full">
             <View className="flex-row items-center gap-3 mb-4 pb-4 border-b border-white/20">
               <View className="w-12 h-12 bg-white/20 rounded-full items-center justify-center">
@@ -73,8 +143,7 @@ export default function Alert() {
               </View>
               <View className="flex-1">
                 <Text className="text-white/60 text-xs mb-1">Location</Text>
-                <Text className="text-white font-semibold text-base">Lianga, Surigao del Sur</Text>
-                <Text className="text-white/80 text-xs">8.6281, 126.1019</Text>
+                <Text className="text-white font-semibold text-base">{userLocation?.full_address}</Text>
               </View>
             </View>
 
@@ -84,20 +153,20 @@ export default function Alert() {
               </View>
               <View className="flex-1">
                 <Text className="text-white/60 text-xs mb-1">Emergency Type</Text>
-                <Text className="text-white font-semibold text-base">Fire</Text>
+                <Text className="text-white font-semibold text-base">{selectedEmergency}</Text>
               </View>
             </View>
           </View>
 
-          {/* Action Buttons */}
           <View className="gap-3 w-full px-4">
             <TouchableOpacity className="bg-white py-4 rounded-full shadow-lg">
-              <Text className="text-[#E63946] font-bold text-base text-center">Message MDRRMC</Text>
+              <Text className="text-[#E63946] font-bold text-base text-center">Pin Your Location</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => setAlertSent(false)}
               className="py-3"
+              style={{ marginBottom: insets.bottom }}
             >
               <Text className="text-white font-semibold text-center">Back to Home</Text>
             </TouchableOpacity>
@@ -106,6 +175,27 @@ export default function Alert() {
       </View>
     );
   }
+
+  const initialLoading = (userProfileLoading || isLoadingLocation);
+
+  const handleSendAlert = async () => {
+    // Refresh location right before sending
+    await getCurrentLocation();
+
+    // Show confirmation
+    RNAlert.alert(
+      'Confirm Emergency Alert',
+      'This will send your current location and details to MDRRMC. Are you sure?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Send Alert',
+          style: 'destructive',
+          onPress: () => setAlertSent(true)
+        }
+      ]
+    );
+  };
 
   return (
     <View className="flex-1 bg-gray-50">
@@ -128,26 +218,25 @@ export default function Alert() {
           <View className="mb-3">
             <Text className="text-sm font-medium text-gray-600 mb-2">Name</Text>
             <View className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-200">
-              <Text className="text-gray-900 font-semibold">Earl Dominic Ado</Text>
+              <Text className="text-gray-900 font-semibold">{userProfile?.profile.name}</Text>
             </View>
           </View>
 
           <View>
             <Text className="text-sm font-medium text-gray-600 mb-2">Contact Number</Text>
             <View className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-200">
-              <Text className="text-gray-900 font-semibold">098160423**</Text>
+              <Text className="text-gray-900 font-semibold">{userProfile?.profile.mobileNo}</Text>
             </View>
           </View>
         </View>
 
-        {/* Location Info */}
         <View className="bg-blue-50 rounded-lg p-4 mb-4 border-2 border-blue-200">
           <View className="flex-row items-center gap-2 mb-3">
             <Ionicons name="location" size={24} color="#2563EB" />
             <Text className="font-bold text-gray-900 text-base">Your Current Location</Text>
           </View>
-          <Text className="text-sm text-gray-700 mb-1 font-medium">Lianga, Surigao del Sur</Text>
-          <Text className="text-xs text-gray-600 mb-3">Latitude: 8.6281, Longitude: 126.1019</Text>
+          <Text className="text-sm text-gray-700 mb-1 font-medium">{userLocation?.full_address}</Text>
+          <Text className="text-xs text-gray-600 mb-3">Latitude: {userLocation?.latitude}, Longitude: {userLocation?.longitude}</Text>
           <View className="flex-row items-center gap-2 pt-3 border-t border-blue-200">
             <View className="w-2 h-2 bg-green-500 rounded-full" />
             <Text className="text-xs text-green-700 font-semibold">GPS Location Acquired</Text>
@@ -217,16 +306,33 @@ export default function Alert() {
         </View>
 
         <TouchableOpacity
-          onPress={() => setAlertSent(true)}
+          onPress={handleSendAlert}
           className="bg-[#E63946] active:bg-[#D32F2F] py-4 rounded-full shadow-lg mb-4"
+          disabled={isLoadingLocation || !userLocation}
         >
-          <Text className="text-white font-bold text-lg text-center">Send Emergency Alert</Text>
+          <Text className="text-white font-bold text-lg text-center">{isLoadingLocation ? 'Getting your location...' : 'Send Emergency Alert'}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity className="py-3 mb-6" onPress={() => router.replace('/(root)/home')}>
           <Text className="text-gray-500 font-medium text-center">Cancel</Text>
         </TouchableOpacity>
       </ScrollView>
+
+
+      <Modal
+        transparent
+        visible={initialLoading}
+        animationType="fade"
+      >
+        <View
+          className="flex-1 justify-center items-center"
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.1)' }}
+        >
+          <View className="bg-white p-6 rounded-2xl items-center">
+            <ActivityIndicator size="large" color="#0286FF" />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
