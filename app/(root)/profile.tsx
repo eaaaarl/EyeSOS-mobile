@@ -427,6 +427,7 @@ export default function Profile() {
                   </View>
 
                   <TouchableOpacity
+                    style={{ marginBottom: insets.bottom }}
                     onPress={getCurrentLocation}
                     className="mt-4 bg-purple-600 py-3 rounded-lg active:bg-purple-700 flex-row items-center justify-center gap-2"
                   >
@@ -454,6 +455,8 @@ export default function Profile() {
           </View>
         </View>
       </Modal>
+
+      
     </View>
   );
 }

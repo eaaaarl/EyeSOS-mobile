@@ -1,3 +1,5 @@
+import { useGetProfilesQuery } from '@/feature/auth/api/authApi';
+import { useAppSelector } from '@/lib/redux/hooks';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
@@ -5,6 +7,14 @@ import { ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-nativ
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function Alert() {
+
+  const user = useAppSelector((state) => state.auth)
+
+  // get current user profile by ID
+  const { data: userProfile, isLoading: userProfileLoading } = useGetProfilesQuery({ id: user.id }, {
+    skip: !user.id
+  })
+
   const insets = useSafeAreaInsets()
   const [selectedEmergency, setSelectedEmergency] = useState('fire');
   const [alertSent, setAlertSent] = useState(false);
@@ -43,7 +53,7 @@ export default function Alert() {
               </View>
               <View className="flex-1">
                 <Text className="text-white/60 text-xs mb-1">Name</Text>
-                <Text className="text-white font-semibold text-base">Earl Dominic Ado</Text>
+                <Text className="text-white font-semibold text-base">{userProfile?.profile.name}</Text>
               </View>
             </View>
 
@@ -53,7 +63,7 @@ export default function Alert() {
               </View>
               <View className="flex-1">
                 <Text className="text-white/60 text-xs mb-1">Contact</Text>
-                <Text className="text-white font-semibold text-base">098160423**</Text>
+                <Text className="text-white font-semibold text-base">{userProfile?.profile.mobileNo}</Text>
               </View>
             </View>
 
