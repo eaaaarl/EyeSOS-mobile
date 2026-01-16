@@ -4,7 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Modal, Alert as RNAlert, ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Modal, Alert as RNAlert, StatusBar, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function Alert() {
@@ -20,6 +21,7 @@ export default function Alert() {
   const [selectedEmergency, setSelectedEmergency] = useState('fire');
   const [alertSent, setAlertSent] = useState(false);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [additionalDetails, setAdditionalDetails] = useState('');
 
   const [userLocation, setUserLocation] = useState<{
     latitude: number;
@@ -201,7 +203,11 @@ export default function Alert() {
     <View className="flex-1 bg-gray-50">
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-      <ScrollView className="flex-1 px-4 py-6" style={{ marginBottom: insets.bottom }}>
+      <KeyboardAwareScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 0, paddingBottom: insets.bottom }}
+        showsVerticalScrollIndicator={false}
+      >
         <View className="bg-white px-4 py-3 border-b border-gray-100" style={{ marginTop: insets.top }}>
           <View className="items-center">
             <View className="w-16 h-16 bg-[#E63946] rounded-full items-center justify-center mb-3">
@@ -284,12 +290,15 @@ export default function Alert() {
         {/* Additional Details */}
         <View className="bg-white rounded-lg p-4 mb-4 shadow-sm">
           <Text className="text-base font-bold text-gray-900 mb-3">Additional Details (Optional)</Text>
-          <View className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-200 min-h-24">
-            <Text className="text-gray-500">Describe the situation...</Text>
-          </View>
-          <Text className="text-xs text-gray-500 mt-2">
-            Add any important information that can help responders
-          </Text>
+          <TextInput
+            placeholder="Describe the situation..."
+            placeholderTextColor="#9CA3AF"
+            className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-200 min-h-24"
+            value={additionalDetails}
+            onChangeText={setAdditionalDetails}
+            multiline
+            textAlignVertical="top"
+          />
         </View>
 
         {/* Important Notice */}
@@ -313,10 +322,10 @@ export default function Alert() {
           <Text className="text-white font-bold text-lg text-center">{isLoadingLocation ? 'Getting your location...' : 'Send Emergency Alert'}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity className="py-3 mb-6" onPress={() => router.replace('/(root)/home')}>
+        <TouchableOpacity className="py-3 border border-gray-200 rounded-full mb-4" onPress={() => router.replace('/(root)/home')}>
           <Text className="text-gray-500 font-medium text-center">Cancel</Text>
         </TouchableOpacity>
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
 
       <Modal
@@ -333,6 +342,6 @@ export default function Alert() {
           </View>
         </View>
       </Modal>
-    </View>
+    </View >
   );
 }
