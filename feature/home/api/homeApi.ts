@@ -108,7 +108,7 @@ export const homeApi = createApi({
                 hasNext,
                 hasPrevious,
               },
-              },
+            },
           },
         };
       },
