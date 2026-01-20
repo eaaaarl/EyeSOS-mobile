@@ -41,6 +41,12 @@ export default function Index() {
     id: user.id
   })
 
+  // Check profiles if have a mobile number
+  const checkMobileNoExists = Boolean(
+    UserProfile?.profile?.mobileNo &&
+    UserProfile.profile.mobileNo.trim() !== ''
+  );
+
   // Get Reports Accidents by User Id
   const {
     data: accidentsReports,
@@ -190,30 +196,66 @@ export default function Index() {
         </View>
 
         <ScrollView className="flex-1">
-          <View className="bg-[#E63946] mx-4 mt-6 mb-6 p-6 rounded-lg">
+
+          <View className="bg-[#E63946] mx-4 mt-4 mb-4 p-6 rounded-lg">
             <Text className="text-2xl font-bold text-white mb-2">Report an Incident</Text>
             <Text className="text-white opacity-90">
               See a disaster or emergency? Take a photo and send it directly to MDRRMC for immediate response.
             </Text>
           </View>
 
+          {!UserProfileLoading && !checkMobileNoExists && (
+            <View className="mx-4 mb-4 p-4 bg-orange-50 border border-orange-400 rounded-lg flex-row items-center">
+              <Ionicons name="warning" size={24} color="#f97316" />
+              <View className="flex-1 ml-3">
+                <Text className="text-sm font-semibold text-gray-900 mb-1">
+                  Phone Number Required
+                </Text>
+                <Text className="text-xs text-gray-600">
+                  Please add your phone number to use emergency features
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => { }}
+                className="bg-orange-500 px-3 py-2 rounded-lg active:bg-orange-600"
+              >
+                <Text className="text-white font-semibold text-xs">Add</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+
           <View className="mx-4 mb-4">
             <TouchableOpacity
               onPress={() => setReportModalVisible(true)}
-              className="bg-[#E63946] active:bg-[#D32F2F] py-4 rounded-lg flex-row items-center justify-center gap-2 shadow-lg"
+              className={`py-4 rounded-lg flex-row items-center justify-center gap-2 shadow-lg ${checkMobileNoExists
+                ? 'bg-[#E63946] active:bg-[#D32F2F]'
+                : 'bg-gray-300'
+                }`}
+              disabled={!checkMobileNoExists}
             >
-              <Ionicons name="camera" size={24} color="white" />
-              <Text className="text-white font-semibold text-base">Report Incident Now</Text>
+              <Ionicons name="camera" size={24} color={checkMobileNoExists ? "white" : "#9CA3AF"} />
+              <Text className={`font-semibold text-base ${checkMobileNoExists ? 'text-white' : 'text-gray-500'
+                }`}>
+                Report Incident Now
+              </Text>
             </TouchableOpacity>
           </View>
 
           <View className="mx-4 mb-6">
             <TouchableOpacity
               onPress={() => router.push('/(root)/alert')}
-              className="bg-white border-2 border-[#E63946] py-4 rounded-lg flex-row items-center justify-center gap-2 shadow-sm active:bg-red-50"
+              className={`py-4 rounded-lg flex-row items-center justify-center gap-2 shadow-sm ${checkMobileNoExists
+                ? 'bg-white border-2 border-[#E63946] active:bg-red-50'
+                : 'bg-gray-100 border-2 border-gray-300'
+                }`}
+              disabled={!checkMobileNoExists}
             >
-              <Ionicons name="alert-circle" size={24} color="#E63946" />
-              <Text className="text-[#E63946] font-semibold text-base">Send Emergency Alert</Text>
+              <Ionicons name="alert-circle" size={24} color={checkMobileNoExists ? "#E63946" : "#9CA3AF"} />
+              <Text className={`font-semibold text-base ${checkMobileNoExists ? 'text-[#E63946]' : 'text-gray-500'
+                }`}>
+                Send Emergency Alert
+              </Text>
             </TouchableOpacity>
           </View>
 
