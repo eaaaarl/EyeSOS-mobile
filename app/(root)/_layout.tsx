@@ -4,7 +4,13 @@ import React from 'react'
 
 export default function RootLayout() {
   return (
-    <Tabs screenOptions={{ headerShown: false }}>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: '#E63946',
+        tabBarInactiveTintColor: '#9CA3AF',
+      }}
+    >
       <Tabs.Screen
         name='home'
         options={{
@@ -32,7 +38,6 @@ export default function RootLayout() {
           )
         }}
       />
-
       <Tabs.Screen
         name='alert'
         options={{
@@ -47,8 +52,8 @@ export default function RootLayout() {
           tabBarStyle: { display: 'none' }
         }}
       />
-      {/* <Tabs.Screen
-        name='message'
+      {/*   <Tabs.Screen
+        name='add-phone-number'
         options={{
           href: null,
           tabBarStyle: { display: 'none' }

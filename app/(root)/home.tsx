@@ -197,8 +197,15 @@ export default function Index() {
 
         <ScrollView className="flex-1">
 
+          <View className="bg-[#E63946] mx-4 mt-4 mb-4 p-6 rounded-lg">
+            <Text className="text-2xl font-bold text-white mb-2">Report an Incident</Text>
+            <Text className="text-white opacity-90">
+              See a disaster or emergency? Take a photo and send it directly to MDRRMC for immediate response.
+            </Text>
+          </View>
+
           {!UserProfileLoading && !checkMobileNoExists && (
-            <View className="mx-4 mt-6 mb-2 p-4 bg-orange-50 border border-orange-400 rounded-lg flex-row items-center">
+            <View className="mx-4 mb-4 p-4 bg-orange-50 border border-orange-400 rounded-lg flex-row items-center">
               <Ionicons name="warning" size={24} color="#f97316" />
               <View className="flex-1 ml-3">
                 <Text className="text-sm font-semibold text-gray-900 mb-1">
@@ -217,12 +224,6 @@ export default function Index() {
             </View>
           )}
 
-          <View className="bg-[#E63946] mx-4 mt-6 mb-6 p-6 rounded-lg">
-            <Text className="text-2xl font-bold text-white mb-2">Report an Incident</Text>
-            <Text className="text-white opacity-90">
-              See a disaster or emergency? Take a photo and send it directly to MDRRMC for immediate response.
-            </Text>
-          </View>
 
           <View className="mx-4 mb-4">
             <TouchableOpacity
