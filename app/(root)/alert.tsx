@@ -101,6 +101,35 @@ export default function Alert() {
     { id: 'other', label: 'Other Emergency', icon: 'alert', color: '#F59E0B' },
   ];
 
+  const handleSendAlert = async () => {
+    // Refresh location right before sending
+    await getCurrentLocation();
+
+    // Show confirmation
+    RNAlert.alert(
+      'Confirm Emergency Alert',
+      'This will send your current location and details to MDRRMC. Are you sure?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Send Alert',
+          style: 'destructive',
+          onPress: () => setAlertSent(true)
+        }
+      ]
+    );
+  };
+
+  const handleConfirmAlert = () => {
+    console.log("Payload", {
+      name: userProfile?.profile.name,
+      mobileNo: userProfile?.profile.mobileNo,
+      location: userLocation?.full_address,
+      emergencyType: selectedEmergency,
+      additionalDetails: additionalDetails
+    })
+  }
+
   if (alertSent) {
     return (
       <View className="flex-1 bg-[#E63946]">
@@ -161,12 +190,17 @@ export default function Alert() {
           </View>
 
           <View className="gap-3 w-full px-4">
-            <TouchableOpacity className="bg-white py-4 rounded-full shadow-lg">
-              <Text className="text-[#E63946] font-bold text-base text-center">Pin Your Location</Text>
+            <TouchableOpacity onPress={handleConfirmAlert} className="bg-white py-4 rounded-full shadow-lg">
+              <Text className="text-[#E63946] font-bold text-base text-center">Pin My Location</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => setAlertSent(false)}
+              onPress={() => {
+                setAlertSent(false);
+                setSelectedEmergency('fire');
+                setAdditionalDetails('')
+                router.replace('/(root)/home')
+              }}
               className="py-3"
               style={{ marginBottom: insets.bottom }}
             >
@@ -179,25 +213,6 @@ export default function Alert() {
   }
 
   const initialLoading = (userProfileLoading || isLoadingLocation);
-
-  const handleSendAlert = async () => {
-    // Refresh location right before sending
-    await getCurrentLocation();
-
-    // Show confirmation
-    RNAlert.alert(
-      'Confirm Emergency Alert',
-      'This will send your current location and details to MDRRMC. Are you sure?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Send Alert',
-          style: 'destructive',
-          onPress: () => setAlertSent(true)
-        }
-      ]
-    );
-  };
 
   return (
     <View className="flex-1 bg-gray-50">
