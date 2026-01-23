@@ -52,13 +52,13 @@ export default function RootLayout() {
           tabBarStyle: { display: 'none' }
         }}
       />
-      {/*   <Tabs.Screen
-        name='add-phone-number'
+      <Tabs.Screen
+        name='complete-profile'
         options={{
           href: null,
           tabBarStyle: { display: 'none' }
         }}
-      /> */}
+      />
     </Tabs>
   )
 }
