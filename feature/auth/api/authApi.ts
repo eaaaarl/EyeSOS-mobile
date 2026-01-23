@@ -5,6 +5,7 @@ import { getProfilesRespons, signInPayload, signUpPayload } from "./interface";
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fakeBaseQuery(),
+  tagTypes: ['getProfiles'],
   endpoints: (builder) => ({
     signUp: builder.mutation<any, signUpPayload>({
       queryFn: async ({ email, mobileNo, name, password }) => {
@@ -105,6 +106,7 @@ export const authApi = createApi({
           },
         };
       },
+      providesTags: ['getProfiles']
     }),
 
     signOut: builder.mutation<any, void>({
@@ -117,6 +119,36 @@ export const authApi = createApi({
         };
       },
     }),
+
+    completeProfile: builder.mutation<any, {payload: {emergency_contact_name:string,emergency_contact_number:number,birth_date:string,permanent_address:string,mobileNo:number,bio:string}, currentUserId:string}>({
+        queryFn: async ({payload, currentUserId}) => {
+          const {error} = await supabase
+          .from('profiles')
+          .update({
+            emergency_contact_name: payload.emergency_contact_name,
+            emergency_contact_number: payload.emergency_contact_number,
+            birth_date: payload.birth_date,
+            permanent_address: payload.permanent_address,
+            mobileNo: payload.mobileNo, 
+            bio: payload.bio
+          })
+          .eq('id', currentUserId)
+
+          if(error) {
+            return { 
+              error: {
+                message:error.message
+              }
+            }
+          }
+          return {
+            data: {
+              message: 'Profile completed.'
+            }
+          }
+        },
+        invalidatesTags: ['getProfiles']
+    })
   }),
 });
 
@@ -125,4 +157,5 @@ export const {
   useSignInMutation,
   useGetProfilesQuery,
   useSignOutMutation,
+  useCompleteProfileMutation
 } = authApi;

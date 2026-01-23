@@ -1,17 +1,21 @@
+import { useCompleteProfileMutation } from '@/feature/auth/api/authApi'
+import { useAppSelector } from '@/lib/redux/hooks'
 import { Ionicons } from '@expo/vector-icons'
 import { router } from 'expo-router'
 import React, { useState } from 'react'
-import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Modal, Text, TextInput, TouchableOpacity, View } from 'react-native'
+
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function CompleteProfileScreen() {
+  const user = useAppSelector((state) => state.auth);
   const insets = useSafeAreaInsets()
   const [formData, setFormData] = useState({
     permanentAddress: '',
-    phoneNumber: '',
+    phoneNumber: undefined,
     emergencyContactName: '',
-    emergencyContactNumber: '',
+    emergencyContactNumber: undefined,
     birthDate: '',
     bio: ''
   })
@@ -23,7 +27,9 @@ export default function CompleteProfileScreen() {
     }))
   }
 
-  const handleSubmit = () => {
+  const [completeProfile, { isLoading }] = useCompleteProfileMutation()
+
+  const handleSubmit = async () => {
     // Validate required fields
     if (!formData.phoneNumber || !formData.emergencyContactName || !formData.emergencyContactNumber) {
       Alert.alert('Required Fields', 'Please fill in all required fields')
@@ -31,9 +37,28 @@ export default function CompleteProfileScreen() {
     }
 
     console.log('Form submitted:', formData)
-    // Add your submission logic here (API call)
-    // After successful submission:
-    // router.back() or router.replace('/(root)/(tabs)')
+
+    const payload = {
+      emergency_contact_name: formData.emergencyContactName,
+      emergency_contact_number: formData.emergencyContactNumber,
+      birth_date: formData.birthDate,
+      permanent_address: formData.permanentAddress,
+      mobileNo: formData.phoneNumber,
+      bio: formData.bio
+    }
+
+    await completeProfile({ payload, currentUserId: user.id })
+
+    setFormData({
+      bio: '',
+      birthDate: '',
+      emergencyContactName: '',
+      emergencyContactNumber: undefined,
+      permanentAddress: '',
+      phoneNumber: undefined
+    })
+
+    router.replace('/(root)/home')
   }
 
   return (
@@ -158,14 +183,32 @@ export default function CompleteProfileScreen() {
           <TouchableOpacity
             onPress={handleSubmit}
             className="bg-[#E63946] py-4 rounded-lg flex-row items-center justify-center gap-2 shadow-lg active:bg-[#D32F2F] mb-8"
+            disabled={isLoading}
           >
             <Ionicons name="checkmark-circle" size={24} color="white" />
             <Text className="text-white font-semibold text-base">
-              Complete Profile
+              {'Complete Profile'}
             </Text>
           </TouchableOpacity>
         </View>
       </KeyboardAwareScrollView>
+
+      {isLoading && (
+        <Modal
+          transparent
+          visible={isLoading}
+          animationType="fade"
+        >
+          <View
+            className="flex-1 justify-center items-center"
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+          >
+            <View className="bg-white p-6 rounded-2xl items-center">
+              <ActivityIndicator size="large" color="#0286FF" />
+            </View>
+          </View>
+        </Modal>
+      )}
     </View>
   )
 }
