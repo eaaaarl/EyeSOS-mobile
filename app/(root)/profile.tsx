@@ -1,5 +1,6 @@
 import { useGetProfilesQuery, useSignOutMutation } from '@/feature/auth/api/authApi';
 import { useGetReportsQuery } from '@/feature/home/api/homeApi';
+import InfoModal from '@/feature/profile/components/info-modal';
 import LocationModalScreen from '@/feature/profile/components/location-modal';
 import PersonalInformationModal from '@/feature/profile/components/personal-information-modal';
 import { useAppSelector } from '@/lib/redux/hooks';
@@ -48,6 +49,11 @@ export default function Profile() {
 
   // Personal Information Modal State
   const [personalInfoModalVisible, setPersonalInfoModalVisible] = useState(false);
+
+  // Support Modals State
+  const [helpSupportModalVisible, setHelpSupportModalVisible] = useState(false);
+  const [termsPrivacyModalVisible, setTermsPrivacyModalVisible] = useState(false);
+  const [aboutModalVisible, setAboutModalVisible] = useState(false);
 
   const handleSignOut = async () => {
     await signOut()
@@ -133,6 +139,15 @@ export default function Profile() {
     setPersonalInfoModalVisible(false);
   };
 
+  const handleOpenHelpSupportModal = () => setHelpSupportModalVisible(true);
+  const handleCloseHelpSupportModal = () => setHelpSupportModalVisible(false);
+
+  const handleOpenTermsPrivacyModal = () => setTermsPrivacyModalVisible(true);
+  const handleCloseTermsPrivacyModal = () => setTermsPrivacyModalVisible(false);
+
+  const handleOpenAboutModal = () => setAboutModalVisible(true);
+  const handleCloseAboutModal = () => setAboutModalVisible(false);
+
   return (
     <View className="flex-1 bg-gray-50">
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
@@ -197,7 +212,7 @@ export default function Profile() {
             <Text className="text-sm font-semibold text-gray-500 uppercase">Account</Text>
           </View>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             className="flex-row items-center justify-between px-4 py-4 border-b border-gray-100 active:bg-gray-50"
             onPress={handleOpenPersonalInfoModal}
           >
@@ -223,7 +238,7 @@ export default function Profile() {
             <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
           </TouchableOpacity>
 
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-4 active:bg-gray-50">
+          {/*     <TouchableOpacity className="flex-row items-center justify-between px-4 py-4 active:bg-gray-50">
             <View className="flex-row items-center gap-3">
               <View className="w-10 h-10 bg-green-100 rounded-full items-center justify-center">
                 <Ionicons name="shield-checkmark-outline" size={20} color="#10B981" />
@@ -231,7 +246,7 @@ export default function Profile() {
               <Text className="text-base text-gray-900 font-normal">Emergency Contacts</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         <View className="bg-white mx-4 mb-4 rounded-lg overflow-hidden">
@@ -280,7 +295,10 @@ export default function Profile() {
             <Text className="text-sm font-semibold text-gray-500 uppercase">Support</Text>
           </View>
 
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-4 border-b border-gray-100 active:bg-gray-50">
+          <TouchableOpacity
+            className="flex-row items-center justify-between px-4 py-4 border-b border-gray-100 active:bg-gray-50"
+            onPress={handleOpenHelpSupportModal}
+          >
             <View className="flex-row items-center gap-3">
               <View className="w-10 h-10 bg-blue-100 rounded-full items-center justify-center">
                 <Ionicons name="help-circle-outline" size={20} color="#2563EB" />
@@ -290,7 +308,10 @@ export default function Profile() {
             <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
           </TouchableOpacity>
 
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-4 border-b border-gray-100 active:bg-gray-50">
+          <TouchableOpacity
+            className="flex-row items-center justify-between px-4 py-4 border-b border-gray-100 active:bg-gray-50"
+            onPress={handleOpenTermsPrivacyModal}
+          >
             <View className="flex-row items-center gap-3">
               <View className="w-10 h-10 bg-indigo-100 rounded-full items-center justify-center">
                 <Ionicons name="document-text-outline" size={20} color="#4F46E5" />
@@ -300,7 +321,10 @@ export default function Profile() {
             <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
           </TouchableOpacity>
 
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-4 active:bg-gray-50">
+          <TouchableOpacity
+            className="flex-row items-center justify-between px-4 py-4 active:bg-gray-50"
+            onPress={handleOpenAboutModal}
+          >
             <View className="flex-row items-center gap-3">
               <View className="w-10 h-10 bg-teal-100 rounded-full items-center justify-center">
                 <Ionicons name="information-circle-outline" size={20} color="#14B8A6" />
@@ -353,7 +377,28 @@ export default function Profile() {
         userProfile={user?.profile || null}
         visible={personalInfoModalVisible}
       />
-        
+
+      <InfoModal
+        visible={helpSupportModalVisible}
+        title="Help & Support"
+        description={`Help & Support content is coming soon.\n\nThis section will include:\n• FAQs and quick tips\n• Ways to contact EyeSOS support (email/chat/hotline)\n• How to report a problem\n\nThis is temporary text and will be updated.`}
+        onClose={handleCloseHelpSupportModal}
+      />
+
+      <InfoModal
+        visible={termsPrivacyModalVisible}
+        title="Terms & Privacy"
+        description={`Terms & Privacy content is coming soon.\n\nThis page will include the Terms of Service and Privacy Policy, covering:\n• Data collection and usage\n• Storage and security\n• Sharing (if applicable)\n• User rights\n\nThis is temporary text and will be updated.`}
+        onClose={handleCloseTermsPrivacyModal}
+      />
+
+      <InfoModal
+        visible={aboutModalVisible}
+        title="About EyeSOS"
+        description={`EyeSOS is built to help people stay safer through faster reporting and better awareness.\n\nDeveloper: Ear Dominic Ado\n\nAbout details will be added here soon (mission, features, and credits).\n\nThis is temporary text and will be updated.`}
+        onClose={handleCloseAboutModal}
+      />
+
     </View>
   );
 }
