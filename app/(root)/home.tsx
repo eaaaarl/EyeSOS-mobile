@@ -204,22 +204,23 @@ export default function Index() {
             </Text>
           </View>
 
+          {/* Complete Profile Alert Banner */}
           {!UserProfileLoading && !checkMobileNoExists && (
             <View className="mx-4 mb-4 p-4 bg-orange-50 border border-orange-400 rounded-lg flex-row items-center">
               <Ionicons name="warning" size={24} color="#f97316" />
               <View className="flex-1 ml-3">
                 <Text className="text-sm font-semibold text-gray-900 mb-1">
-                  Phone Number Required
+                  Complete Your Profile
                 </Text>
                 <Text className="text-xs text-gray-600">
-                  Please add your phone number to use emergency features
+                  Add your details to use emergency features
                 </Text>
               </View>
               <TouchableOpacity
-                onPress={() => { }}
-                className="bg-orange-500 px-3 py-2 rounded-lg active:bg-orange-600"
+                onPress={() => { router.replace('/(root)/complete-profile') }}
+                className="bg-orange-500 px-4 py-2 rounded-lg active:bg-orange-600"
               >
-                <Text className="text-white font-semibold text-xs">Add</Text>
+                <Text className="text-white font-semibold text-xs">Complete</Text>
               </TouchableOpacity>
             </View>
           )}
