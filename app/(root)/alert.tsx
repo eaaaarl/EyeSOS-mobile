@@ -1,34 +1,45 @@
+import { useSendEmergencyReportMutation } from '@/feature/alert/api/alertApi';
+import {
+  AdditionalDetailsSection,
+  AlertHeader,
+  AlertSentScreen,
+  ImportantNotice,
+  LocationSection,
+  YourInformationSection,
+  type AlertProfile,
+  type UserLocation,
+} from '@/feature/alert/components';
 import { useGetProfilesQuery } from '@/feature/auth/api/authApi';
 import { useAppSelector } from '@/lib/redux/hooks';
-import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Modal, Alert as RNAlert, StatusBar, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Modal, Alert as RNAlert, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function Alert() {
+  const user = useAppSelector((state) => state.auth);
+  const { data: userProfile, isLoading: userProfileLoading } = useGetProfilesQuery(
+    { id: user.id },
+    { skip: !user.id }
+  );
 
-  const user = useAppSelector((state) => state.auth)
-
-  // get current user profile by ID
-  const { data: userProfile, isLoading: userProfileLoading } = useGetProfilesQuery({ id: user.id }, {
-    skip: !user.id
-  })
-
-  const insets = useSafeAreaInsets()
-  const [selectedEmergency, setSelectedEmergency] = useState('fire');
+  const insets = useSafeAreaInsets();
   const [alertSent, setAlertSent] = useState(false);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [additionalDetails, setAdditionalDetails] = useState('');
 
-  const [userLocation, setUserLocation] = useState<{
-    latitude: number;
-    longitude: number;
-    full_address: string;
-    address: any;
-  } | null>(null);
+  const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
+
+  const profile: AlertProfile | undefined = userProfile?.profile
+    ? {
+      name: userProfile.profile.name,
+      mobileNo: userProfile.profile.mobileNo,
+      emergency_contact_name: (userProfile.profile as { emergency_contact_name?: string }).emergency_contact_name,
+      emergency_contact_number: (userProfile.profile as { emergency_contact_number?: string }).emergency_contact_number,
+    }
+    : undefined;
 
   const requestLocationPermission = async () => {
     try {
@@ -50,7 +61,7 @@ export default function Alert() {
           'Please enable location permissions to see your current location.',
           [
             { text: 'Cancel', style: 'cancel' },
-            { text: 'Open Settings', onPress: () => Location.requestForegroundPermissionsAsync() }
+            { text: 'Open Settings', onPress: () => Location.requestForegroundPermissionsAsync() },
           ]
         );
         setIsLoadingLocation(false);
@@ -74,7 +85,7 @@ export default function Alert() {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
         full_address: cleanedAddress || rawAddress,
-        address: address[0]
+        address: address[0],
       });
     } catch (error) {
       console.log('Location error:', error);
@@ -92,20 +103,9 @@ export default function Alert() {
       getCurrentLocation();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id])
+  }, [user?.id]);
 
-  const emergencyTypes = [
-    { id: 'fire', label: 'Fire', icon: 'flame', color: '#DC2626' },
-    { id: 'flood', label: 'Flood', icon: 'water', color: '#2563EB' },
-    { id: 'medical', label: 'Medical Emergency', icon: 'medkit', color: '#10B981' },
-    { id: 'other', label: 'Other Emergency', icon: 'alert', color: '#F59E0B' },
-  ];
-
-  const handleSendAlert = async () => {
-    // Refresh location right before sending
-    await getCurrentLocation();
-
-    // Show confirmation
+  const handleSendAlert = () => {
     RNAlert.alert(
       'Confirm Emergency Alert',
       'This will send your current location and details to MDRRMC. Are you sure?',
@@ -114,240 +114,109 @@ export default function Alert() {
         {
           text: 'Send Alert',
           style: 'destructive',
-          onPress: () => setAlertSent(true)
-        }
+          onPress: () => setAlertSent(true),
+        },
       ]
     );
   };
 
-  const handleConfirmAlert = () => {
-    console.log("Payload", {
-      name: userProfile?.profile.name,
-      mobileNo: userProfile?.profile.mobileNo,
-      location: userLocation?.full_address,
-      emergencyType: selectedEmergency,
-      additionalDetails: additionalDetails
-    })
-  }
+  const [sendEmergencyReport, { isLoading }] = useSendEmergencyReportMutation()
+
+  const handleConfirmAlert = async () => {
+    try {
+      console.log('Payload', {
+        name: profile?.name,
+        mobileNo: profile?.mobileNo,
+        emergencyContactName: profile?.emergency_contact_name || undefined,
+        emergencyContactNumber: profile?.emergency_contact_number ?? undefined,
+        location: userLocation?.full_address,
+        additionalDetails: additionalDetails || undefined,
+      });
+
+      await sendEmergencyReport({
+        details: additionalDetails,
+        emergency_contact_name: profile?.emergency_contact_name as string,
+        emergency_contact_number: profile?.emergency_contact_number as string,
+        latitude: userLocation?.latitude as number,
+        location: userLocation?.full_address ?? '',
+        longitude: userLocation?.longitude as number,
+        mobileNo: profile?.mobileNo ?? '',
+        name: profile?.name ?? '',
+        reported_by: userProfile?.profile.id ?? ''
+      })
+
+      setAdditionalDetails('');
+      setAlertSent(false);
+      router.replace('/(root)/home')
+    } catch (error) {
+      console.log('error alert', error)
+    }
+  };
+
+  const handleResetAndGoHome = () => {
+    setAlertSent(false);
+    setAdditionalDetails('');
+    router.replace('/(root)/home');
+  };
 
   if (alertSent) {
     return (
-      <View className="flex-1 bg-[#E63946]">
+      <>
         <StatusBar barStyle="light-content" backgroundColor="#E63946" />
-
-        <View className="flex-1 items-center justify-center px-6" style={{ marginTop: insets.top }}>
-          <View className="w-32 h-32 mt-8 bg-white/20 rounded-full items-center justify-center mb-8 relative">
-            <Ionicons name="checkmark-circle" size={80} color="white" />
-            <View className="absolute w-40 h-40 bg-white rounded-full opacity-10 animate-pulse" />
-            <View className="absolute w-48 h-48 bg-white rounded-full opacity-5 animate-pulse" />
-          </View>
-
-          <Text className="text-white text-3xl font-bold mb-3 text-center">Alert Sent!</Text>
-          <Text className="text-white/90 text-base mb-8 text-center px-4">
-            MDRRMC has received your emergency alert and location
-          </Text>
-
-          <View className="bg-white/10 rounded-2xl p-6 mb-8 w-full">
-            <View className="flex-row items-center gap-3 mb-4 pb-4 border-b border-white/20">
-              <View className="w-12 h-12 bg-white/20 rounded-full items-center justify-center">
-                <Ionicons name="person" size={24} color="white" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-white/60 text-xs mb-1">Name</Text>
-                <Text className="text-white font-semibold text-base">{userProfile?.profile.name}</Text>
-              </View>
-            </View>
-
-            <View className="flex-row items-center gap-3 mb-4 pb-4 border-b border-white/20">
-              <View className="w-12 h-12 bg-white/20 rounded-full items-center justify-center">
-                <Ionicons name="call" size={24} color="white" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-white/60 text-xs mb-1">Contact</Text>
-                <Text className="text-white font-semibold text-base">{userProfile?.profile.mobileNo}</Text>
-              </View>
-            </View>
-
-            <View className="flex-row items-center gap-3 mb-4 pb-4 border-b border-white/20">
-              <View className="w-12 h-12 bg-white/20 rounded-full items-center justify-center">
-                <Ionicons name="location" size={24} color="white" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-white/60 text-xs mb-1">Location</Text>
-                <Text className="text-white font-semibold text-base">{userLocation?.full_address}</Text>
-              </View>
-            </View>
-
-            <View className="flex-row items-center gap-3">
-              <View className="w-12 h-12 bg-white/20 rounded-full items-center justify-center">
-                <Ionicons name="flame" size={24} color="white" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-white/60 text-xs mb-1">Emergency Type</Text>
-                <Text className="text-white font-semibold text-base">{selectedEmergency}</Text>
-              </View>
-            </View>
-          </View>
-
-          <View className="gap-3 w-full px-4">
-            <TouchableOpacity onPress={handleConfirmAlert} className="bg-white py-4 rounded-full shadow-lg">
-              <Text className="text-[#E63946] font-bold text-base text-center">Pin My Location</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => {
-                setAlertSent(false);
-                setSelectedEmergency('fire');
-                setAdditionalDetails('')
-                router.replace('/(root)/home')
-              }}
-              className="py-3"
-              style={{ marginBottom: insets.bottom }}
-            >
-              <Text className="text-white font-semibold text-center">Back to Home</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
+        <AlertSentScreen
+          isLoading={isLoading}
+          profile={profile}
+          userLocation={userLocation}
+          additionalDetails={additionalDetails}
+          onPinLocation={handleConfirmAlert}
+          onResetAndGoHome={handleResetAndGoHome}
+          topInset={insets.top}
+          bottomInset={insets.bottom}
+        />
+      </>
     );
   }
 
-  const initialLoading = (userProfileLoading || isLoadingLocation);
+  const initialLoading = userProfileLoading || isLoadingLocation;
 
   return (
     <View className="flex-1 bg-gray-50">
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       <KeyboardAwareScrollView
-        className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 0, paddingBottom: insets.bottom }}
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingTop: 0,
+          paddingBottom: insets.bottom,
+        }}
         showsVerticalScrollIndicator={false}
       >
-        <View className="bg-white px-4 py-3 border-b border-gray-100" style={{ marginTop: insets.top }}>
-          <View className="items-center">
-            <View className="w-16 h-16 bg-[#E63946] rounded-full items-center justify-center mb-3">
-              <Ionicons name="alert-circle" size={36} color="white" />
-            </View>
-            <Text className="text-2xl font-bold text-gray-900">Emergency Alert</Text>
-            <Text className="text-gray-600 font-semibold text-sm mt-1">Send your location and details to MDRRMC</Text>
-          </View>
-        </View>
-
-        <View className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-          <Text className="text-base font-bold text-gray-900 mb-3">Your Information</Text>
-
-          <View className="mb-3">
-            <Text className="text-sm font-medium text-gray-600 mb-2">Name</Text>
-            <View className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-200">
-              <Text className="text-gray-900 font-semibold">{userProfile?.profile.name}</Text>
-            </View>
-          </View>
-
-          <View>
-            <Text className="text-sm font-medium text-gray-600 mb-2">Contact Number</Text>
-            <View className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-200">
-              <Text className="text-gray-900 font-semibold">{userProfile?.profile.mobileNo}</Text>
-            </View>
-          </View>
-        </View>
-
-        <View className="bg-blue-50 rounded-lg p-4 mb-4 border-2 border-blue-200">
-          <View className="flex-row items-center gap-2 mb-3">
-            <Ionicons name="location" size={24} color="#2563EB" />
-            <Text className="font-bold text-gray-900 text-base">Your Current Location</Text>
-          </View>
-          <Text className="text-sm text-gray-700 mb-1 font-medium">{userLocation?.full_address}</Text>
-          <Text className="text-xs text-gray-600 mb-3">Latitude: {userLocation?.latitude}, Longitude: {userLocation?.longitude}</Text>
-          <View className="flex-row items-center gap-2 pt-3 border-t border-blue-200">
-            <View className="w-2 h-2 bg-green-500 rounded-full" />
-            <Text className="text-xs text-green-700 font-semibold">GPS Location Acquired</Text>
-          </View>
-        </View>
-
-        {/* Emergency Type Selection */}
-        <View className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-          <Text className="text-base font-bold text-gray-900 mb-3">Select Emergency Type</Text>
-
-          <View className="gap-3">
-            {emergencyTypes.map((type) => (
-              <TouchableOpacity
-                key={type.id}
-                onPress={() => setSelectedEmergency(type.id)}
-                className={`flex-row items-center gap-3 px-4 py-4 rounded-lg border-2 ${selectedEmergency === type.id
-                  ? 'bg-red-50 border-[#E63946]'
-                  : 'bg-gray-50 border-gray-200'
-                  }`}
-              >
-                <View
-                  className="w-12 h-12 rounded-full items-center justify-center"
-                  style={{ backgroundColor: selectedEmergency === type.id ? `${type.color}20` : '#F3F4F6' }}
-                >
-                  <Ionicons
-                    name={type.icon as any}
-                    size={24}
-                    color={selectedEmergency === type.id ? type.color : '#6B7280'}
-                  />
-                </View>
-                <Text
-                  className={`text-base font-semibold flex-1 ${selectedEmergency === type.id ? 'text-gray-900' : 'text-gray-700'
-                    }`}
-                >
-                  {type.label}
-                </Text>
-                {selectedEmergency === type.id && (
-                  <Ionicons name="checkmark-circle" size={24} color="#E63946" />
-                )}
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        {/* Additional Details */}
-        <View className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-          <Text className="text-base font-bold text-gray-900 mb-3">Additional Details (Optional)</Text>
-          <TextInput
-            placeholder="Describe the situation..."
-            placeholderTextColor="#9CA3AF"
-            className="bg-gray-50 px-4 py-3 rounded-lg border border-gray-200 min-h-24"
-            value={additionalDetails}
-            onChangeText={setAdditionalDetails}
-            multiline
-            textAlignVertical="top"
-          />
-        </View>
-
-        {/* Important Notice */}
-        <View className="bg-yellow-50 rounded-lg p-4 mb-6 border border-yellow-200">
-          <View className="flex-row items-start gap-2">
-            <Ionicons name="information-circle" size={20} color="#F59E0B" />
-            <View className="flex-1">
-              <Text className="text-xs font-semibold text-yellow-900 mb-1">Important</Text>
-              <Text className="text-xs text-yellow-800">
-                By sending this alert, MDRRMC will receive your name, contact number, GPS location, and emergency type. Response team will be dispatched immediately.
-              </Text>
-            </View>
-          </View>
-        </View>
+        <AlertHeader topInset={insets.top} />
+        <YourInformationSection profile={profile} />
+        <LocationSection location={userLocation} />
+        <AdditionalDetailsSection value={additionalDetails} onChangeText={setAdditionalDetails} />
+        <ImportantNotice />
 
         <TouchableOpacity
           onPress={handleSendAlert}
           className="bg-[#E63946] active:bg-[#D32F2F] py-4 rounded-full shadow-lg mb-4"
           disabled={isLoadingLocation || !userLocation}
         >
-          <Text className="text-white font-bold text-lg text-center">{isLoadingLocation ? 'Getting your location...' : 'Send Emergency Alert'}</Text>
+          <Text className="text-white font-bold text-lg text-center">
+            {isLoadingLocation ? 'Getting your location...' : 'Send Emergency Alert'}
+          </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity className="py-3 border border-gray-200 rounded-full mb-4" onPress={() => router.replace('/(root)/home')}>
+        <TouchableOpacity
+          className="py-3 border border-gray-200 rounded-full mb-4"
+          onPress={() => router.replace('/(root)/home')}
+        >
           <Text className="text-gray-500 font-medium text-center">Cancel</Text>
         </TouchableOpacity>
       </KeyboardAwareScrollView>
 
-
-      <Modal
-        transparent
-        visible={initialLoading}
-        animationType="fade"
-      >
+      <Modal transparent visible={initialLoading} animationType="fade">
         <View
           className="flex-1 justify-center items-center"
           style={{ backgroundColor: 'rgba(0, 0, 0, 0.1)' }}
@@ -357,6 +226,6 @@ export default function Alert() {
           </View>
         </View>
       </Modal>
-    </View >
+    </View>
   );
 }

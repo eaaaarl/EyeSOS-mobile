@@ -45,6 +45,14 @@ const getSeverityConfig = (severity: Report["severity"]) => {
       icon: 'alert-circle' as const,
       iconColor: '#dc2626',
       label: 'Critical'
+    },
+    emergency: {
+      bg: "bg-purple-50",
+      border: "border-purple-300",
+      text: "text-purple-800",
+      icon: "flash" as const,
+      iconColor: "#7c3aed",
+      label: "Emergency"
     }
   };
   return configs[severity];
@@ -100,15 +108,17 @@ export default function ReportViewDetails({
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ gap: 12, paddingRight: 20 }}
           >
-            {report.imageUrl.map((url, index) => (
-              <Image
-                key={index}
-                source={{ uri: url }}
-                className="rounded-lg bg-gray-100"
-                style={{ width: width, height: 240 }}
-                resizeMode="cover"
-              />
-            ))}
+            {report.imageUrl && report.imageUrl.length > 0 &&
+              report.imageUrl.map((url, index) => (
+                <Image
+                  key={index}
+                  source={{ uri: url }}
+                  className="rounded-lg bg-gray-100"
+                  style={{ width: width, height: 240 }}
+                  resizeMode="cover"
+                />
+              ))
+            }
           </ScrollView>
         </View>
 
@@ -167,7 +177,7 @@ export default function ReportViewDetails({
             <View style={{ height: 1 }} className="bg-gray-200" />
             <View className="flex-row justify-between items-center" style={{ paddingVertical: 8 }}>
               <Text className="text-sm text-gray-600 font-medium">Total Images:</Text>
-              <Text className="text-sm text-gray-900 font-semibold">{report.imageUrl.length}</Text>
+              <Text className="text-sm text-gray-900 font-semibold">{report.imageUrl?.length ?? 0}</Text>
             </View>
           </View>
         </View>
