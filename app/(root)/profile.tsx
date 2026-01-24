@@ -361,7 +361,6 @@ export default function Profile() {
         </View>
       </Modal>
 
-      {/* My Location Modal */}
       <LocationModalScreen
         getCurrentLocation={getCurrentLocation}
         isLoading={isLoadingLocation}
@@ -370,7 +369,6 @@ export default function Profile() {
         visible={locationModalVisible}
       />
 
-      {/* Personal Information Modal */}
       <PersonalInformationModal
         isLoading={isLoading}
         onClose={handleClosePersonalInfoModal}
