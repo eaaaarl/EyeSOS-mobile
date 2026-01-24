@@ -45,6 +45,14 @@ const getSeverityConfig = (severity: Report["severity"]) => {
       icon: "alert-circle" as const,
       iconColor: "#dc2626",
       label: "Critical"
+    },
+    emergency: {
+      bg: "bg-purple-50",
+      border: "border-purple-300",
+      text: "text-purple-800",
+      icon: "flash" as const,
+      iconColor: "#7c3aed",
+      label: "Emergency"
     }
   };
   return configs[severity];
@@ -153,10 +161,12 @@ export default function ReportsCard({
             style={{ padding: 16 }}
           >
             <View className="flex-row" style={{ gap: 14 }}>
-              <ImageWithSkeleton
-                uri={report.imageUrl[0]}
-                count={report.imageUrl.length}
-              />
+              {report.imageUrl && report.imageUrl.length > 0 && (
+                <ImageWithSkeleton
+                  uri={report.imageUrl[0]}
+                  count={report.imageUrl.length}
+                />
+              )}
 
               <View className="flex-1">
                 <View className="flex-row items-start justify-between" style={{ marginBottom: 8 }}>

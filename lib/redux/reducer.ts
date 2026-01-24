@@ -1,3 +1,4 @@
+import { alertApi } from "@/feature/alert/api/alertApi";
 import { authApi } from "@/feature/auth/api/authApi";
 import { homeApi } from "@/feature/home/api/homeApi";
 import { combineReducers } from "@reduxjs/toolkit";
@@ -14,9 +15,10 @@ const rootReducer = combineReducers({
   // RTK Query
   [authApi.reducerPath]: authApi.reducer,
   [homeApi.reducerPath]: homeApi.reducer,
+  [alertApi.reducerPath]: alertApi.reducer
 });
 
-export const apis = [authApi, homeApi];
+export const apis = [authApi, homeApi,alertApi];
 
 export const apisReducerPath = apis.map((api) => api.reducerPath);
 

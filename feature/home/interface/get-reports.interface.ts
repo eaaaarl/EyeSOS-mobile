@@ -3,7 +3,7 @@ export interface Report {
   created_at: string;
   updated_at: string;
   report_number: string;
-  severity: "minor" | "moderate" | "high" | "critical";
+  severity: "minor" | "moderate" | "high" | "critical" | "emergency";
   reported_by: string;
   reporter_name: string;
   reporter_contact: string;
