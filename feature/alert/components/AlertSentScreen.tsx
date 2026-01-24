@@ -1,11 +1,11 @@
+import { profile } from '@/feature/auth/api/interface';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { ActivityIndicator, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import type { UserLocation } from './LocationSection';
-import type { AlertProfile } from './YourInformationSection';
 
 interface AlertSentScreenProps {
-  profile: AlertProfile | undefined;
+  profile: profile | undefined;
   userLocation: UserLocation | null;
   additionalDetails: string;
   onPinLocation: () => void;

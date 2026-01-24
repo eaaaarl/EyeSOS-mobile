@@ -6,8 +6,7 @@ import {
   ImportantNotice,
   LocationSection,
   YourInformationSection,
-  type AlertProfile,
-  type UserLocation,
+  type UserLocation
 } from '@/feature/alert/components';
 import { useGetProfilesQuery } from '@/feature/auth/api/authApi';
 import { useAppSelector } from '@/lib/redux/hooks';
@@ -31,15 +30,6 @@ export default function Alert() {
   const [additionalDetails, setAdditionalDetails] = useState('');
 
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
-
-  const profile: AlertProfile | undefined = userProfile?.profile
-    ? {
-      name: userProfile.profile.name,
-      mobileNo: userProfile.profile.mobileNo,
-      emergency_contact_name: (userProfile.profile as { emergency_contact_name?: string }).emergency_contact_name,
-      emergency_contact_number: (userProfile.profile as { emergency_contact_number?: string }).emergency_contact_number,
-    }
-    : undefined;
 
   const requestLocationPermission = async () => {
     try {
@@ -124,24 +114,16 @@ export default function Alert() {
 
   const handleConfirmAlert = async () => {
     try {
-      console.log('Payload', {
-        name: profile?.name,
-        mobileNo: profile?.mobileNo,
-        emergencyContactName: profile?.emergency_contact_name || undefined,
-        emergencyContactNumber: profile?.emergency_contact_number ?? undefined,
-        location: userLocation?.full_address,
-        additionalDetails: additionalDetails || undefined,
-      });
 
       await sendEmergencyReport({
         details: additionalDetails,
-        emergency_contact_name: profile?.emergency_contact_name as string,
-        emergency_contact_number: profile?.emergency_contact_number as string,
+        emergency_contact_name: userProfile?.profile?.emergency_contact_name as string,
+        emergency_contact_number: userProfile?.profile?.emergency_contact_number as string,
         latitude: userLocation?.latitude as number,
         location: userLocation?.full_address ?? '',
         longitude: userLocation?.longitude as number,
-        mobileNo: profile?.mobileNo ?? '',
-        name: profile?.name ?? '',
+        mobileNo: userProfile?.profile?.mobileNo ?? '',
+        name: userProfile?.profile?.name ?? '',
         reported_by: userProfile?.profile.id ?? ''
       })
 
@@ -165,7 +147,7 @@ export default function Alert() {
         <StatusBar barStyle="light-content" backgroundColor="#E63946" />
         <AlertSentScreen
           isLoading={isLoading}
-          profile={profile}
+          profile={userProfile?.profile}
           userLocation={userLocation}
           additionalDetails={additionalDetails}
           onPinLocation={handleConfirmAlert}
@@ -193,7 +175,7 @@ export default function Alert() {
         showsVerticalScrollIndicator={false}
       >
         <AlertHeader topInset={insets.top} />
-        <YourInformationSection profile={profile} />
+        <YourInformationSection profile={userProfile?.profile} />
         <LocationSection location={userLocation} />
         <AdditionalDetailsSection value={additionalDetails} onChangeText={setAdditionalDetails} />
         <ImportantNotice />

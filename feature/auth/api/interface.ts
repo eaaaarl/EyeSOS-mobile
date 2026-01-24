@@ -17,6 +17,8 @@ export interface profile {
   mobileNo: string;
   avatarUrl?: string;
   created_at?: string;
+  emergency_contact_name: string;
+  emergency_contact_number: string;
 }
 
 export interface getProfilesRespons {
